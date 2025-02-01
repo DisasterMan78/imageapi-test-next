@@ -6,6 +6,8 @@ export default function Home() {
     <div className={styles.page}>
       <main className={styles.main}>
         <Image
+          role="heading"
+          aria-level={1}
           className={styles.logo}
           src="/next.svg"
           alt="Next.js logo"
