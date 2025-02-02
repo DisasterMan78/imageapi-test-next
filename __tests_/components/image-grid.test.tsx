@@ -2,8 +2,8 @@ import '@testing-library/jest-dom'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import ImageGrid from '../../src/app/components/image-grid';
-import testData from '../image-test-data';
+import ImageGrid from '../../src/app/components/image-grid'
+import testData from '../image-test-data'
 
 const imageGridProps = {
   imageData: testData,
@@ -17,7 +17,7 @@ describe('ImageGrid', () => {
 
   it('displays one image for each item in the API data', () => {
     render(<ImageGrid { ...imageGridProps} />)
-    const images = screen.getAllByRole('img');
+    const images = screen.getAllByRole('img')
 
     expect(images.length).toEqual(testData.length)
   })
@@ -25,7 +25,7 @@ describe('ImageGrid', () => {
   it('displays author name for each image', () => {
     render(<ImageGrid { ...imageGridProps} />)
 
-    const items = screen.getAllByRole('listitem');
+    const items = screen.getAllByRole('listitem')
 
     items.forEach((item, index) => {
       expect(item).toHaveTextContent(testData[index].author)
@@ -40,7 +40,7 @@ describe('ImageGrid', () => {
     const buttons = within(nav).getAllByRole('button')
 
     expect(buttons.length).toEqual(1)
-    expect(buttons[0]).toHaveTextContent("Next page");
+    expect(buttons[0]).toHaveTextContent("Next page")
   })
 
   it('should triggers API request for page 2 when "Next page" button is clicked', async () => {
