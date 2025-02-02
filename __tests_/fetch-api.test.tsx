@@ -1,6 +1,3 @@
-/**
- * @jest-environment node
- */
 import {http, HttpResponse} from 'msw'
 import {setupServer} from 'msw/node'
 import '@testing-library/jest-dom'
@@ -35,6 +32,8 @@ describe('api fetch tests', () => {
 
     try {
       await FetchApiOnClient(testApiURL)
+    // error objects are deliberately of unknown type in TS
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       expect(e.message).toEqual('Failed to fetch data');
     }
