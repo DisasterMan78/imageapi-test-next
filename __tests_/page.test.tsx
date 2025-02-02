@@ -62,7 +62,7 @@ describe('Home', () => {
   it('displays one image for each item in the API data', async () => {
     render(<Home />)
     const container = screen.getByTestId('picsum-result')
-    const images = await screen.findAllByRole('image');
+    const images = await screen.findAllByRole('img');
 
     expect(images.length).toEqual(testResponse.length)
   })
