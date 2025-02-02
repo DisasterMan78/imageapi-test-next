@@ -1,5 +1,7 @@
 "use client"
 import { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation'
+
 import styles from "./page.module.css";
 import FetchApiOnClient from "./fetch-api";
 
@@ -10,15 +12,18 @@ import { PicsumImage } from "./components/image-grid";
 type APIError = false | string;
 
 const Home = () => {
+  const router = useRouter()
   const [images, setImages] = useState<PicsumImage[]>([]);
   const [dataIsLoading, setDataIsLoading] = useState(true);
   const [hasDataError, setHasDataError] = useState<APIError>(false);
+  const [imagePage, setImagePage] = useState(1);
 
   const thumbnailWidth = 300;
   const thumbnailHeight = 200;
 
   useEffect(() => {
-    FetchApiOnClient('https://picsum.photos/v2/list')
+    setDataIsLoading(true);
+    FetchApiOnClient(`https://picsum.photos/v2/list?page=${imagePage}`)
       .then(response => {
         if (response instanceof Error === true) {
           setHasDataError(response.message);
@@ -27,12 +32,21 @@ const Home = () => {
         }
         setDataIsLoading(false);
       })
-  }, []);
+  }, [imagePage]);
+
+  const onNavClick = (event: MouseEvent) => {
+    const page = (event.currentTarget as HTMLButtonElement).value;
+    setImagePage(parseInt(page));
+    // @ts-expect-error 'shallow' does not exist in type 'NavigateOptions'
+    router.push(`/${page}`, {shallow:true})
+  }
 
   const imageGridProps = {
     imageData: images,
     thumbnailWidth,
     thumbnailHeight,
+    page: imagePage,
+    onNavClick,
   }
 
   return (
