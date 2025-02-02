@@ -26,12 +26,12 @@ const Navigation = ({ page, onNavClick }: NavigationProps) => (
   <div role="navigation" className={styles.navContainer}>
     <div>
       {(page !== 1) && (
-        <button onClick={e => onNavClick(e)} value={page - 1}>Next page</button>
+        <button onClick={e => onNavClick(e as unknown as MouseEvent)} value={page - 1}>Next page</button>
       )}
     </div>
     <div>Page {page}</div>
     <div>
-      <button onClick={e => onNavClick(e)} value={page + 1}>Next page</button>
+      <button onClick={e => onNavClick(e as unknown as MouseEvent)} value={page + 1}>Next page</button>
     </div>
   </div>
 )
