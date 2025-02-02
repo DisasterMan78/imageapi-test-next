@@ -3,23 +3,16 @@ import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import FetchApiOnClient from "./fetch-api";
 
-import LoadingSpinner from "./components/loading-spinner.tsx";
-
-type PicsumImage = {
-  id: string,
-  author: string,
-  url: string,
-  download_url: string,
-  width: number,
-  height: number,
-}
+import LoadingSpinner from "./components/loading-spinner";
+import ImageGrid from './components/image-grid';
+import { PicsumImage } from "./components/image-grid";
 
 type APIError = false | string;
 
 const Home = () => {
   const [images, setImages] = useState<PicsumImage[]>([]);
   const [dataIsLoading, setDataIsLoading] = useState(true);
-  const [hasDataError, setHasDataError] = useState<ApiError>(false);
+  const [hasDataError, setHasDataError] = useState<APIError>(false);
 
   const thumbnailWidth = 300;
   const thumbnailHeight = 200;
@@ -36,17 +29,10 @@ const Home = () => {
       })
   }, []);
 
-  const thumbnailURL = (url: string) => url.replace(/\d*\/\d*$/, `${thumbnailWidth}/${thumbnailHeight}`);
-
-  const renderImages = (data: PicsumImage[]) => {
-    return data.map(image => (
-      <li key={image.id}>
-        <figure>
-          <img width={thumbnailWidth} height={thumbnailHeight} src={thumbnailURL(image.download_url)} />
-          <figcaption>{image.author}</figcaption>
-        </figure>
-      </li>
-    ));
+  const imageGridProps = {
+    imageData: images,
+    thumbnailWidth,
+    thumbnailHeight,
   }
 
   return (
@@ -63,9 +49,7 @@ const Home = () => {
             hasDataError !== false ?
               (<div role="alert" aria-live="assertive">{hasDataError}</div>)
             :
-              (<ul className={styles.thumbnailGrid} data-testid="picsum-result">
-                { renderImages(images) }
-              </ul>)
+              (<ImageGrid { ...imageGridProps } />)
         }
       </main>
     </div>

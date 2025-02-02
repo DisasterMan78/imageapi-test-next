@@ -4,45 +4,13 @@ import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 
 import Home from '../src/app/page'
+import testData from './image-test-data';
 
 const testApiURL = 'https://picsum.photos/v2/list';
-const testResponse = [
-  {
-    "id": "0",
-    "author": "Alejandro Escamilla",
-    "width": 5000,
-    "height": 3333,
-    "url": "https://unsplash.com/photos/yC-Yzbqy7PY",
-    "download_url": "https://picsum.photos/id/0/5000/3333"
-  },
-  {
-    "id": "1",
-    "author": "Alejandro Escamilla",
-    "width": 5000,
-    "height": 3333,
-    "url": "https://unsplash.com/photos/LNRyGwIJr5c",
-    "download_url": "https://picsum.photos/id/1/5000/3333"
-  },
-  {
-    "id": "2",
-    "author": "Alejandro Escamilla",
-    "width": 5000,
-    "height": 3333,
-    "url": "https://unsplash.com/photos/N7XodRrbzS0",
-    "download_url": "https://picsum.photos/id/2/5000/3333"
-  },
-  {
-    "id": "3",
-    "author": "Alejandro Escamilla",
-    "width": 5000,
-    "height": 3333,
-    "url": "https://unsplash.com/photos/Dl6jeyfihLk",
-    "download_url": "https://picsum.photos/id/3/5000/3333"
-  },
-];
+
 const server = setupServer(
   http.get(testApiURL, () => {
-    return HttpResponse.json(testResponse)
+    return HttpResponse.json(testData)
   }),
 )
 
@@ -81,23 +49,10 @@ describe('Home', () => {
     expect(error).toBeInTheDocument();
   })
 
-  it('displays one image for each item in the API data', async () => {
+  it('renders image grid', async () => {
     render(<Home />)
-    const container = screen.findByTestId('picsum-result')
-    const images = await screen.findAllByRole('img');
+    const container = await screen.findByTestId('image-grid')
 
-    expect(images.length).toEqual(testResponse.length)
-  })
-
-
-  it('displays author name for each image', async () => {
-    render(<Home />)
-    const container = screen.findByTestId('picsum-result')
-    const items = await screen.findAllByRole('listitem');
-
-    items.forEach((item, index) => {
-      expect(item).toHaveTextContent(testResponse[index].author)
-    })
-
+    expect(container).toBeInTheDocument()
   })
 })

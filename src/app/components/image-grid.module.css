@@ -1,0 +1,11 @@
+.thumbnailGrid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.thumbnailGrid > li {
+  padding: 2rem;
+  text-align: center;
+  list-style: none;
+}
