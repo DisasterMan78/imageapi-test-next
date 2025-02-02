@@ -69,7 +69,7 @@ describe('Home', () => {
 
   it('displays one image for each item in the API data', async () => {
     render(<Home />)
-    const container = screen.getByTestId('picsum-result')
+    const container = screen.findByTestId('picsum-result')
     const images = await screen.findAllByRole('img');
 
     expect(images.length).toEqual(testResponse.length)
@@ -78,7 +78,7 @@ describe('Home', () => {
 
   it('displays author name for each image', async () => {
     render(<Home />)
-    const container = screen.getByTestId('picsum-result')
+    const container = screen.findByTestId('picsum-result')
     const items = await screen.findAllByRole('listitem');
 
     items.forEach((item, index) => {
