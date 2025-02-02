@@ -38,5 +38,6 @@ describe('ImageGrid', () => {
     const buttons = within(nav).getAllByRole('button')
 
     expect(buttons.length).toEqual(1)
+    expect(buttons[0]).toHaveTextContent("Next page");
   })
 })
