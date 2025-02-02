@@ -62,9 +62,23 @@ describe('Home', () => {
   it('shows loading before image data received', () => {
     render(<Home />)
 
-    const loading = screen.getByRole('progressbar')
+    const loading = screen.getAllByRole('progressbar')[0]
 
     expect(loading).toHaveTextContent('Loading images')
+  })
+
+  it('displays an error if API call fails', async () => {
+    server.use(
+      http.get(testApiURL, () => {
+        return new HttpResponse(null, {status: 500})
+      }),
+    )
+
+    render(<Home />)
+
+    const error = await screen.findByText('Failed to fetch data')
+
+    expect(error).toBeInTheDocument();
   })
 
   it('displays one image for each item in the API data', async () => {
