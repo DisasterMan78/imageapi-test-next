@@ -1,12 +1,21 @@
-import {http, HttpResponse} from 'msw'
+import { useRouter } from 'next/router'
+import { http, HttpResponse } from 'msw'
 import {setupServer} from 'msw/node'
 import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import mockRouter from 'next-router-mock';
 
 import Home from '../src/app/page'
 import testData from './image-test-data';
 
 const testApiURL = 'https://picsum.photos/v2/list';
+
+jest.mock("next/navigation", () => ({
+  useRouter,
+  usePathname: jest.fn().mockReturnValue('/[page]'),
+}));
+jest.mock('next/router', () => jest.requireActual('next-router-mock'))
 
 const server = setupServer(
   http.get(testApiURL, () => {
@@ -54,5 +63,22 @@ describe('Home', () => {
     const container = await screen.findByTestId('image-grid')
 
     expect(container).toBeInTheDocument()
+  })
+
+  it('correctly calls Next router when `onNavClick()` is called by an event with target `value` attribute', async () => {
+    const user = userEvent.setup()
+    render(<Home />)
+
+    const nextButton = await screen.findByRole('button', { name: /Next page/ });
+
+    expect(nextButton.getAttribute('value')).toEqual('2')
+
+    await user.click(nextButton)
+
+    expect(mockRouter).toMatchObject({
+      asPath: "/",
+      pathname: "/2",
+      query: {},
+    });
   })
 })
