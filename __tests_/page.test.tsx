@@ -36,8 +36,9 @@ describe('Home', () => {
   })
 
   it('receives image data from Picsum API', async () => {
-    const data = await screen.getByTestId('picsum-result');
+    render(<Home />)
+    const data = await screen.findByText(/Alejandro Escamilla/);
 
-    expect(data).toHaveTextContent(/Alejandro Escamilla/)
+    expect(data).toBeInTheDocument()
   })
 })
