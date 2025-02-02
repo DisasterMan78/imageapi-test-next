@@ -30,7 +30,10 @@ const Home = () => {
   const renderImages = (data: PicsumImage[]) => {
     return data.map(image => (
       <li key={image.id}>
-        <img width={thumbnailWidth} height={thumbnailHeight} src={thumbnailURL(image.download_url)} />
+        <figure>
+          <img width={thumbnailWidth} height={thumbnailHeight} src={thumbnailURL(image.download_url)} />
+          <figcaption>By: {image.author}</figcaption>
+        </figure>
       </li>
     ));
   }
