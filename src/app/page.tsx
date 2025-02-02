@@ -4,6 +4,8 @@ import styles from "./page.module.css";
 import FetchApiOnClient from "./fetch-api";
 import { Url } from "url";
 
+import LoadingSpinner from "./components/loading-spinner.tsx";
+
 type PicsumImage = {
   id: string,
   author: string,
@@ -46,7 +48,10 @@ const Home = () => {
         <h1 role="heading" aria-level={1}>Snowplow test - Picsum API</h1>
         {
           dataIsLoading === true ?
-          (<div role="progressbar">Loading images</div>)
+          (<div className={styles.loadingIndicator} role="progressbar">
+            <div role="alert" aria-live="assertive">Loading images</div>
+            <LoadingSpinner />
+          </div>)
           :
           (<ul className={styles.thumbnailGrid} data-testid="picsum-result">
             { renderImages(images) }
