@@ -15,6 +15,8 @@ type PicsumImage = {
 
 const Home = () => {
   const [images, setImages] = useState<PicsumImage[]>([]);
+  const thumbnailWidth = 300;
+  const thumbnailHeight = 200;
 
   useEffect(() => {
     FetchApiOnClient('https://picsum.photos/v2/list')
@@ -30,7 +32,7 @@ const Home = () => {
         <ul data-testid="picsum-result">
           {images.map(image => (
             <li key={image.id}>
-              <img role="image" src={image.download_url} />
+              <img width={thumbnailWidth} height={thumbnailHeight} role="image" src={image.download_url} />
             </li>
           ))}
         </ul>
