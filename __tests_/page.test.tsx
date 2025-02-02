@@ -15,6 +15,30 @@ const testResponse = [
     "url": "https://unsplash.com/photos/yC-Yzbqy7PY",
     "download_url": "https://picsum.photos/id/0/5000/3333"
   },
+  {
+    "id": "1",
+    "author": "Alejandro Escamilla",
+    "width": 5000,
+    "height": 3333,
+    "url": "https://unsplash.com/photos/LNRyGwIJr5c",
+    "download_url": "https://picsum.photos/id/1/5000/3333"
+  },
+  {
+    "id": "2",
+    "author": "Alejandro Escamilla",
+    "width": 5000,
+    "height": 3333,
+    "url": "https://unsplash.com/photos/N7XodRrbzS0",
+    "download_url": "https://picsum.photos/id/2/5000/3333"
+  },
+  {
+    "id": "3",
+    "author": "Alejandro Escamilla",
+    "width": 5000,
+    "height": 3333,
+    "url": "https://unsplash.com/photos/Dl6jeyfihLk",
+    "download_url": "https://picsum.photos/id/3/5000/3333"
+  },
 ];
 const server = setupServer(
   http.get(testApiURL, () => {
@@ -37,8 +61,16 @@ describe('Home', () => {
 
   it('receives image data from Picsum API', async () => {
     render(<Home />)
-    const data = await screen.findByText(/Alejandro Escamilla/);
+    const data = await screen.findByText(/Alejandro Escamilla/)
 
     expect(data).toBeInTheDocument()
+  })
+
+  it('displays one image for each item in the API data', async () => {
+    render(<Home />)
+    const container = screen.getByTestId('picsum-result')
+    const images = await screen.findAllByRole('image');
+
+    expect(images.length).toEqual(testResponse.length)
   })
 })
