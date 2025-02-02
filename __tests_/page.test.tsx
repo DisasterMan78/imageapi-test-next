@@ -9,5 +9,6 @@ describe('Home', () => {
     const heading = screen.getByRole('heading', { level: 1 })
 
     expect(heading).toBeInTheDocument()
+    expect(heading).toHaveTextContent('Snowplow test - Picsum API')
   })
 })
