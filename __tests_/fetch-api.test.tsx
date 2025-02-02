@@ -26,4 +26,17 @@ describe('api fetch tests', () => {
     expect(result).toMatchObject(testResponse)
   })
 
+  it('handles server error', async () => {
+    server.use(
+      http.get(testApiURL, () => {
+        return new HttpResponse(null, {status: 500})
+      }),
+    )
+
+    try {
+      await FetchApiOnClient(testApiURL)
+    } catch (e: any) {
+      expect(e.message).toEqual('Failed to fetch data');
+    }
+  })
 })
