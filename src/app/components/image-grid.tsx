@@ -11,26 +11,42 @@ export type PicsumImage = {
   height: number,
 }
 
+type NavigationProps = {
+  page: number,
+  onNavClick: (event: MouseEvent) => void,
+}
+
 export type ImageGridProps = {
   imageData: PicsumImage[],
   thumbnailWidth: number,
   thumbnailHeight: number,
-  page: number,
-}
+} & NavigationProps;
 
-
-const Navigation = () => (
-  <div role="navigation">
-    <button>Next page</button>
+const Navigation = ({ page, onNavClick }: NavigationProps) => (
+  <div role="navigation" className={styles.navContainer}>
+    <div>
+      {(page !== 1) && (
+        <button onClick={e => onNavClick(e)} value={page - 1}>Next page</button>
+      )}
+    </div>
+    <div>Page {page}</div>
+    <div>
+      <button onClick={e => onNavClick(e)} value={page + 1}>Next page</button>
+    </div>
   </div>
 )
 
-const ImageGrid = ({imageData, thumbnailWidth, thumbnailHeight}: ImageGridProps) => {
+const ImageGrid = ({imageData, thumbnailWidth, thumbnailHeight, page, onNavClick}: ImageGridProps) => {
   const thumbnailURL = (url: string) => url.replace(/\d*\/\d*$/, `${thumbnailWidth}/${thumbnailHeight}`);
+
+  const navProps = {
+    page,
+    onNavClick,
+  }
 
   return (
     <div data-testid="image-grid">
-      { Navigation() }
+      <Navigation { ...navProps } />
       <ul className={styles.thumbnailGrid}>
         {
           imageData.map(image => (

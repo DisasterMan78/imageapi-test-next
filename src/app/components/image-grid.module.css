@@ -1,11 +1,27 @@
-.thumbnailGrid {
+.thumbnailGrid,
+.navContainer {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  margin: 0 auto;
 }
 
-.thumbnailGrid > li {
+.navContainer {
+  width: 600px;
+}
+
+.thumbnailGrid > li,
+.navContainer > div {
   padding: 2rem;
   text-align: center;
   list-style: none;
+}
+
+.navContainer > div {
+  width: 200px;
+}
+
+.navContainer button {
+  font-size: 1rem;
+  padding: 0.5rem;
 }
