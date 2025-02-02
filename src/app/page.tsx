@@ -25,16 +25,20 @@ const Home = () => {
       })
   }, []);
 
+  const renderImages = (data: PicsumImage[]) => {
+    return data.map(image => (
+      <li key={image.id}>
+        <img width={thumbnailWidth} height={thumbnailHeight}role="image" src={`${image.download_url}`} />
+      </li>
+    ));
+  }
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <h1 role="heading" aria-level={1}>Snowplow test - Picsum API</h1>
         <ul data-testid="picsum-result">
-          {images.map(image => (
-            <li key={image.id}>
-              <img width={thumbnailWidth} height={thumbnailHeight} role="image" src={image.download_url} />
-            </li>
-          ))}
+          { renderImages(images) }
         </ul>
       </main>
     </div>
