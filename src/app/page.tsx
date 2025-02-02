@@ -15,6 +15,7 @@ type PicsumImage = {
 
 const Home = () => {
   const [images, setImages] = useState<PicsumImage[]>([]);
+  const [dataIsLoading, setDataIsLoading] = useState(true);
   const thumbnailWidth = 300;
   const thumbnailHeight = 200;
 
@@ -22,6 +23,7 @@ const Home = () => {
     FetchApiOnClient('https://picsum.photos/v2/list')
       .then(response => {
         setImages(response);
+        setDataIsLoading(false);
       })
   }, []);
 
@@ -42,9 +44,14 @@ const Home = () => {
     <div className={styles.page}>
       <main className={styles.main}>
         <h1 role="heading" aria-level={1}>Snowplow test - Picsum API</h1>
-        <ul className={styles.thumbnailGrid} data-testid="picsum-result">
-          { renderImages(images) }
-        </ul>
+        {
+          dataIsLoading === true ?
+          (<div role="progressbar">Loading images</div>)
+          :
+          (<ul className={styles.thumbnailGrid} data-testid="picsum-result">
+            { renderImages(images) }
+          </ul>)
+        }
       </main>
     </div>
   );
