@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react";
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 
 import styles from "./page.module.css";
 import FetchApiOnClient from "./fetch-api";
@@ -12,11 +12,12 @@ import { PicsumImage } from "./components/image-grid";
 type APIError = false | string;
 
 const Home = () => {
+  const params = useParams();
   const router = useRouter()
   const [images, setImages] = useState<PicsumImage[]>([]);
   const [dataIsLoading, setDataIsLoading] = useState(true);
   const [hasDataError, setHasDataError] = useState<APIError>(false);
-  const [imagePage, setImagePage] = useState(1);
+  const [imagePage, setImagePage] = useState(parseInt(params.page as string) || 1);
 
   const thumbnailWidth = 300;
   const thumbnailHeight = 200;

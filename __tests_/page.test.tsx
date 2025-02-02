@@ -13,6 +13,9 @@ const testApiURL = 'https://picsum.photos/v2/list';
 
 jest.mock("next/navigation", () => ({
   useRouter,
+  useParams: () => ({
+    get: () => {}
+  }),
   usePathname: jest.fn().mockReturnValue('/[page]'),
 }));
 jest.mock('next/router', () => jest.requireActual('next-router-mock'))
