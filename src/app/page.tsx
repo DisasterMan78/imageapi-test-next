@@ -32,7 +32,7 @@ const Home = () => {
       <li key={image.id}>
         <figure>
           <img width={thumbnailWidth} height={thumbnailHeight} src={thumbnailURL(image.download_url)} />
-          <figcaption>By: {image.author}</figcaption>
+          <figcaption>{image.author}</figcaption>
         </figure>
       </li>
     ));
@@ -42,7 +42,7 @@ const Home = () => {
     <div className={styles.page}>
       <main className={styles.main}>
         <h1 role="heading" aria-level={1}>Snowplow test - Picsum API</h1>
-        <ul data-testid="picsum-result">
+        <ul className={styles.thumbnailGrid} data-testid="picsum-result">
           { renderImages(images) }
         </ul>
       </main>
