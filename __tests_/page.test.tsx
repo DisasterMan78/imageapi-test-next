@@ -59,6 +59,14 @@ describe('Home', () => {
     expect(heading).toHaveTextContent('Snowplow test - Picsum API')
   })
 
+  it('shows loading before image data received', () => {
+    render(<Home />)
+
+    const loading = screen.getByRole('progressbar')
+
+    expect(loading).toHaveTextContent('Loading images')
+  })
+
   it('displays one image for each item in the API data', async () => {
     render(<Home />)
     const container = screen.getByTestId('picsum-result')
