@@ -7,6 +7,7 @@ import testData from '../image-test-data'
 
 const imageGridProps = {
   imageData: testData,
+  APILimit: 4,
   thumbnailWidth: 300,
   thumbnailHeight: 200,
   page: 1,
@@ -23,7 +24,11 @@ describe('ImageGrid', () => {
   })
 
   it('displays author name for each image', () => {
-    render(<ImageGrid { ...imageGridProps} />)
+    render(<ImageGrid {...{
+      ...imageGridProps,
+      // Limit data length to make test faster
+      imageData: testData.slice(0, 4),
+    }} />)
 
     const items = screen.getAllByRole('listitem')
 
@@ -33,14 +38,55 @@ describe('ImageGrid', () => {
 
   })
 
-  it('displays onluy a "Next page" button on page 1', () => {
+  it('displays only a "Next page" button on page 1', () => {
     render(<ImageGrid { ...imageGridProps} />)
 
     const nav = screen.getByRole('navigation');
     const buttons = within(nav).getAllByRole('button')
 
     expect(buttons.length).toEqual(1)
-    expect(buttons[0]).toHaveTextContent("Next page")
+    expect(buttons[0]).toHaveTextContent('Next page')
+  })
+
+  it('displays both buttons on intermediate page', () => {
+    render(<ImageGrid {...{
+      ...imageGridProps,
+      page: 2,
+      APILimit: 30
+    }} />)
+
+    const nav = screen.getByRole('navigation');
+    const buttons = within(nav).getAllByRole('button')
+
+    expect(buttons.length).toEqual(2)
+    expect(buttons[0]).toHaveTextContent('Prev page')
+    expect(buttons[1]).toHaveTextContent('Next page')
+  })
+
+  it('displays only a "Prev page" button on last page', () => {
+    render(<ImageGrid {...{
+      ...imageGridProps,
+      page: 34,
+      APILimit: 30,
+      imageData: testData.slice(0, 4),
+    }} />)
+
+    const nav = screen.getByRole('navigation');
+    const buttons = within(nav).getAllByRole('button')
+
+    expect(buttons.length).toEqual(1)
+    expect(buttons[0]).toHaveTextContent('Prev page')
+  })
+
+  it('shows a notice if no image data is received', () => {
+    render(<ImageGrid {...{
+      ...imageGridProps,
+      imageData: [],
+    }} />)
+
+    const notice = screen.getByRole('alert')
+
+    expect(notice).toHaveTextContent('No more images to display')
   })
 
   it('should triggers API request for page 2 when "Next page" button is clicked', async () => {

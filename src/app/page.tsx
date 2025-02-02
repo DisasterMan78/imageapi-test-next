@@ -21,10 +21,11 @@ const Home = () => {
 
   const thumbnailWidth = 300;
   const thumbnailHeight = 200;
+  const APILimit = 30;
 
   useEffect(() => {
     setDataIsLoading(true);
-    FetchApiOnClient(`https://picsum.photos/v2/list?page=${imagePage}`)
+    FetchApiOnClient(`https://picsum.photos/v2/list?page=${imagePage}&limit=${APILimit}`)
       .then(response => {
         if (response instanceof Error === true) {
           setHasDataError(response.message);
@@ -47,6 +48,7 @@ const Home = () => {
     thumbnailWidth,
     thumbnailHeight,
     page: imagePage,
+    APILimit,
     onNavClick,
   }
 

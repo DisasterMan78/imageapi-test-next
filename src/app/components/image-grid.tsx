@@ -13,6 +13,8 @@ export type PicsumImage = {
 
 type NavigationProps = {
   page: number,
+  APILimit: number,
+  resultCount: number,
   onNavClick: (event: MouseEvent) => void,
 }
 
@@ -20,27 +22,41 @@ export type ImageGridProps = {
   imageData: PicsumImage[],
   thumbnailWidth: number,
   thumbnailHeight: number,
-} & NavigationProps;
+} & Omit<NavigationProps, "resultCount">;
 
-const Navigation = ({ page, onNavClick }: NavigationProps) => (
+const Navigation = ({ page, APILimit, resultCount, onNavClick }: NavigationProps) => (
   <div role="navigation" className={styles.navContainer}>
     <div>
       {(page !== 1) && (
-        <button onClick={e => onNavClick(e as unknown as MouseEvent)} value={page - 1}>Next page</button>
+        <button
+          onClick={e => onNavClick(e as unknown as MouseEvent)}
+          value={page - 1}
+          rel="prev"
+        >Prev page</button>
       )}
     </div>
     <div>Page {page}</div>
     <div>
-      <button onClick={e => onNavClick(e as unknown as MouseEvent)} value={page + 1}>Next page</button>
+      {
+        (resultCount >= APILimit) && (
+          <button
+            onClick={e => onNavClick(e as unknown as MouseEvent)}
+            value={page + 1}
+            rel="next"
+          >Next page</button>
+        )
+      }
     </div>
   </div>
 )
 
-const ImageGrid = ({imageData, thumbnailWidth, thumbnailHeight, page, onNavClick}: ImageGridProps) => {
+const ImageGrid = ({imageData, APILimit, thumbnailWidth, thumbnailHeight, page, onNavClick}: ImageGridProps) => {
   const thumbnailURL = (url: string) => url.replace(/\d*\/\d*$/, `${thumbnailWidth}/${thumbnailHeight}`);
 
   const navProps = {
     page,
+    APILimit,
+    resultCount: imageData.length,
     onNavClick,
   }
 
@@ -49,7 +65,7 @@ const ImageGrid = ({imageData, thumbnailWidth, thumbnailHeight, page, onNavClick
       <Navigation { ...navProps } />
       <ul className={styles.thumbnailGrid}>
         {
-          imageData.map(image => (
+          imageData.length > 0 && imageData.map(image => (
             <li key={image.id}>
               <figure>
                 <Image
@@ -62,6 +78,22 @@ const ImageGrid = ({imageData, thumbnailWidth, thumbnailHeight, page, onNavClick
               </figure>
             </li>
           ))
+        }
+        {
+          // On the off chance the last page has exactly {APILimit}
+          // number of images or user modifies url param > # pages
+          // This is useful as there is no obvious data from Picsum
+          // on the number of images it provides
+          // API responses do containe a 'link' header but it's a
+          // PITA to access and pass through, and it returns a link
+          // even on invalid pages so I'll leave that for now. It is
+          // a solvable problem, but perfection is the enemy of good
+          // enough.
+          imageData.length === 0 && (
+          <li key="no-data" role="alert" aria-live="assertive">
+              No more images to display
+          </li>
+          )
         }
       </ul>
     </div>
