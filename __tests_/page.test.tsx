@@ -66,4 +66,16 @@ describe('Home', () => {
 
     expect(images.length).toEqual(testResponse.length)
   })
+
+
+  it('displays author name for each image', async () => {
+    render(<Home />)
+    const container = screen.getByTestId('picsum-result')
+    const items = await screen.findAllByRole('listitem');
+
+    items.forEach((item, index) => {
+      expect(item).toHaveTextContent(testResponse[index].author)
+    })
+
+  })
 })
