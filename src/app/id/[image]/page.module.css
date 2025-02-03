@@ -1,0 +1,28 @@
+.editImage {
+  display: flex;
+  flex-direction: row;
+  font-size: 1.2rem;
+}
+
+.editImage button {
+  font-size: 1rem;
+  padding: 0.5rem;
+}
+
+.editControl {
+  padding: 0.5rem;
+}
+
+.editControl input {
+  font-size: 1.2rem;
+  width: 100px;
+  margin-left: 0.5rem;
+}
+
+.imagePreview, .imageOriginal {
+  background-color: #333;
+}
+
+.imagePreview {
+  margin-right: 1rem;
+}
