@@ -22,6 +22,7 @@ export type ImageGridProps = {
   imageData: PicsumImage[],
   thumbnailWidth: number,
   thumbnailHeight: number,
+  onImageClick: (event: MouseEvent) => void,
 } & Omit<NavigationProps, "resultCount">;
 
 const Navigation = ({ page, APILimit, resultCount, onNavClick }: NavigationProps) => (
@@ -50,7 +51,7 @@ const Navigation = ({ page, APILimit, resultCount, onNavClick }: NavigationProps
   </div>
 )
 
-const ImageGrid = ({imageData, APILimit, thumbnailWidth, thumbnailHeight, page, onNavClick}: ImageGridProps) => {
+const ImageGrid = ({imageData, APILimit, thumbnailWidth, thumbnailHeight, page, onNavClick, onImageClick}: ImageGridProps) => {
   const thumbnailURL = (url: string) => url.replace(/\d*\/\d*$/, `${thumbnailWidth}/${thumbnailHeight}`);
 
   const navProps = {
@@ -68,12 +69,17 @@ const ImageGrid = ({imageData, APILimit, thumbnailWidth, thumbnailHeight, page, 
           imageData.length > 0 && imageData.map(image => (
             <li key={image.id}>
               <figure>
-                <Image
-                  width={thumbnailWidth}
-                  height={thumbnailHeight}
-                  src={thumbnailURL(image.download_url)}
-                  alt={`Image by ${image.author}`}
-                />
+                <button
+                  onClick={e => onImageClick(e as unknown as MouseEvent)}
+                  value={image.id}
+                >
+                  <Image
+                    width={thumbnailWidth}
+                    height={thumbnailHeight}
+                    src={thumbnailURL(image.download_url)}
+                    alt={`Image by ${image.author}`}
+                  />
+                </button>
                 <figcaption>{image.author}</figcaption>
               </figure>
             </li>

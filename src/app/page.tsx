@@ -6,7 +6,7 @@ import styles from "./page.module.css";
 import FetchApiOnClient from "./fetch-api";
 
 import LoadingSpinner from "./components/loading-spinner";
-import ImageGrid from './components/image-grid';
+import ImageGrid, { ImageGridProps } from './components/image-grid';
 import { PicsumImage } from "./components/image-grid";
 
 type APIError = false | string;
@@ -43,13 +43,21 @@ const Home = () => {
     router.push(`/${page}`, {shallow:true})
   }
 
-  const imageGridProps = {
+  const onImageClick = (event: MouseEvent) => {
+    const imageId = (event.currentTarget as HTMLButtonElement).value;
+    // setImagePage(parseInt(page));
+    // @ts-expect-error 'shallow' does not exist in type 'NavigateOptions'
+    router.push(`/id/${imageId}`, {shallow:true})
+  }
+
+  const imageGridProps: ImageGridProps = {
     imageData: images,
     thumbnailWidth,
     thumbnailHeight,
     page: imagePage,
     APILimit,
     onNavClick,
+    onImageClick,
   }
 
   return (
