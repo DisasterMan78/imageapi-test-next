@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useParams } from 'next/navigation'
 import Image from "next/image";
 
@@ -24,14 +24,31 @@ const ImageEditor = () => {
   const imageSizeFactor = 2.5;
   const imageWidth = thumbnailWidth * imageSizeFactor;
   const imageHeight = thumbnailHeight * imageSizeFactor;
-
+  const editorInitialValues = {
+    width: imageWidth,
+    height: imageHeight,
+    grayscale: false,
+    blur: 0,
+  }
   const params = useParams();
+
+  if (typeof window !== "undefined") {
+    const storageId = `image-id-${params.image}`;
+    const itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
+    if (itemStorage) {
+      editorInitialValues.width = itemStorage.width;
+      editorInitialValues.height = itemStorage.height;
+      editorInitialValues.grayscale = itemStorage.grayscale;
+      editorInitialValues.blur = itemStorage.blur;
+    }
+  }
+
   const [image, setImage] = useState<PicsumImage>();
   const [dataIsLoading, setDataIsLoading] = useState(true);
   const [hasDataError, setHasDataError] = useState<APIError>(false);
-  const [editedSize, setEditedSize] = useState<EditedSize>({ height: imageHeight, width: imageWidth });
-  const [grayscale, setGrayscale] = useState(false);
-  const [blur, setBlur] = useState(0);
+  const [editedSize, setEditedSize] = useState<EditedSize>({ height: editorInitialValues.height, width: editorInitialValues.width });
+  const [grayscale, setGrayscale] = useState(editorInitialValues.grayscale);
+  const [blur, setBlur] = useState(editorInitialValues.blur);
 
   useEffect(() => {
     setDataIsLoading(true);
@@ -60,8 +77,65 @@ const ImageEditor = () => {
     )
   }
 
+  const getDownloadURL = (url: string, editedSize: EditedSize, graysclae: boolean, blur: number) => url.replace(/\d*\/\d*$/, `${editedSize.width}/${editedSize.height}?${grayscale ? 'grayscale' : ''}${blur > 0 ? `&blur=${blur}` : ''}`);
 
-  const getDownloadURL = (url: string, editedSize: EditedSize, graysclae: boolean, blur: number) => url.replace(/\d*\/\d*$/, `${editedSize.width}/${editedSize.height}?${grayscale ? 'grayscale' : ''}${blur > 0 ? `&blur=${blur}`: ''}`);
+  const onHeightChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const height = parseInt(e.currentTarget.value);
+    setEditedSize({
+      height,
+      width: editedSize.width,
+    });
+
+    if (typeof window !== "undefined") {
+      const storageId = `image-id-${e.currentTarget.getAttribute('data-imageid')}`;
+      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string) || editorInitialValues;
+
+      itemStorage.height = height;
+      localStorage.setItem(storageId, JSON.stringify(itemStorage))
+    }
+  }
+
+  const onWidthChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const width = parseInt(e.currentTarget.value);
+    setEditedSize({
+      height: editedSize.height,
+      width,
+    });
+
+    if (typeof window !== "undefined") {
+      const storageId = `image-id-${e.currentTarget.getAttribute('data-imageid')}`;
+      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string) || editorInitialValues;
+
+      itemStorage.width = width;
+      localStorage.setItem(storageId, JSON.stringify(itemStorage))
+    }
+  }
+
+  const onGrayscaleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const grayscale = e.currentTarget.checked;
+    setGrayscale(grayscale)
+
+    if (typeof window !== "undefined") {
+      const storageId = `image-id-${e.currentTarget.getAttribute('data-imageid')}`;
+      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string) || editorInitialValues;
+
+      itemStorage.grayscale = grayscale;
+      localStorage.setItem(storageId, JSON.stringify(itemStorage))
+    }
+  }
+
+  const onBlurChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const blur = parseInt(e.currentTarget.value);
+    setBlur(blur)
+
+    if (typeof window !== "undefined") {
+      const storageId = `image-id-${e.currentTarget.getAttribute('data-imageid')}`;
+      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string) || editorInitialValues;
+
+      itemStorage.blur = blur;
+      localStorage.setItem(storageId, JSON.stringify(itemStorage))
+    }
+  }
 
   return (
     <div className={homeStyles.page}>
@@ -90,11 +164,9 @@ const ImageEditor = () => {
                         autoFocus
                         type="text"
                         id="edit-width"
+                        data-imageid={image?.id}
                         value={editedSize.width ?? ""}
-                        onChange={(e) => setEditedSize({
-                          width: parseInt(e.currentTarget.value),
-                          height: editedSize.height,
-                        })}
+                        onChange={(e) => onWidthChange(e)}
                       />
                     </div>
                     <div className={styles.editControl}>
@@ -106,11 +178,9 @@ const ImageEditor = () => {
                       <input
                         type="text"
                         id="edit-height"
+                        data-imageid={image?.id}
                         value={editedSize.height ?? ""}
-                        onChange={(e) => setEditedSize({
-                          width: editedSize.width,
-                          height: parseInt(e.currentTarget.value),
-                        })}
+                        onChange={(e) => onHeightChange(e)}
                       />
                     </div>
                     <div className={styles.editControl}>
@@ -120,9 +190,10 @@ const ImageEditor = () => {
                       <input
                         type="checkbox"
                         id="edit-grayscale"
+                        data-imageid={image?.id}
                         data-testid="edit-grayscale"
                         checked={grayscale}
-                        onChange={() => setGrayscale(!grayscale)}
+                        onChange={(e) => onGrayscaleChange(e)}
                       />
                     </div>
                     <div className={styles.editControl}>
@@ -134,11 +205,12 @@ const ImageEditor = () => {
                       <input
                         type="number"
                         id="edit-blur"
+                        data-imageid={image?.id}
                         min="0"
                         max="10"
                         step="1"
                         value={blur ?? 0}
-                        onChange={(e) => setBlur(parseInt(e.currentTarget.value))}
+                        onChange={(e) => onBlurChange(e)}
                       />
                     </div>
                   </div>
@@ -157,6 +229,11 @@ const ImageEditor = () => {
                       href={getDownloadURL(image?.download_url as string, editedSize, grayscale, blur)}
                       target="_blank"
                     >
+                      <div
+                        className="sizeNote"
+                      >
+                        Changing height and width will affect the visible area of the downloaded image
+                      </div>
                       <button>Get edited image in new tab</button>
                     </Link>
                   </div>
@@ -169,6 +246,12 @@ const ImageEditor = () => {
                   width={imageWidth}
                   height={imageHeight}
                 />
+                <style jsx>{`
+                  .sizeNote {
+                    width: ${thumbnailWidth}px;
+                    font-size: 1rem;
+                  }
+                `}</style>
               </div>)
         }
       </main>
