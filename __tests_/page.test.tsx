@@ -72,11 +72,11 @@ describe('Home', () => {
     const user = userEvent.setup()
     render(<Home />)
 
-    const nextButton = await screen.findByRole('button', { name: /Next page/ });
+    const nextButtons = await screen.findAllByRole('button', { name: /Next page/ });
 
-    expect(nextButton.getAttribute('value')).toEqual('2')
+    expect(nextButtons[0].getAttribute('value')).toEqual('2')
 
-    await user.click(nextButton)
+    await user.click(nextButtons[0])
 
     expect(mockRouter).toMatchObject({
       asPath: "/",

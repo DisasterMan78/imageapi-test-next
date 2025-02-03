@@ -102,6 +102,7 @@ const ImageGrid = ({imageData, APILimit, thumbnailWidth, thumbnailHeight, page, 
           )
         }
       </ul>
+      <Navigation { ...navProps } />
     </div>
   );
 }

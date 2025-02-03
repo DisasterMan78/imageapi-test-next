@@ -11,7 +11,8 @@ const imageGridProps = {
   thumbnailWidth: 300,
   thumbnailHeight: 200,
   page: 1,
-  onNavClick: jest.fn(() => {}),
+  onNavClick: jest.fn(() => { }),
+  onImageClick: jest.fn(() => {}),
 }
 
 describe('ImageGrid', () => {
@@ -41,7 +42,7 @@ describe('ImageGrid', () => {
   it('displays only a "Next page" button on page 1', () => {
     render(<ImageGrid { ...imageGridProps} />)
 
-    const nav = screen.getByRole('navigation');
+    const nav = screen.getAllByRole('navigation')[0];
     const buttons = within(nav).getAllByRole('button')
 
     expect(buttons.length).toEqual(1)
@@ -55,7 +56,7 @@ describe('ImageGrid', () => {
       APILimit: 30
     }} />)
 
-    const nav = screen.getByRole('navigation');
+    const nav = screen.getAllByRole('navigation')[0];
     const buttons = within(nav).getAllByRole('button')
 
     expect(buttons.length).toEqual(2)
@@ -71,7 +72,7 @@ describe('ImageGrid', () => {
       imageData: testData.slice(0, 4),
     }} />)
 
-    const nav = screen.getByRole('navigation');
+    const nav = screen.getAllByRole('navigation')[0];
     const buttons = within(nav).getAllByRole('button')
 
     expect(buttons.length).toEqual(1)
@@ -93,7 +94,7 @@ describe('ImageGrid', () => {
     const user = userEvent.setup()
     render(<ImageGrid { ...imageGridProps} />)
 
-    const nextButton = screen.getByRole('button', { name: /Next page/ });
+    const nextButton = screen.getAllByRole('button', { name: /Next page/ })[0];
     expect(nextButton.getAttribute('value')).toEqual('2')
     await user.click(nextButton)
 
