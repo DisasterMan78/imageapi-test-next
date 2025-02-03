@@ -27,6 +27,8 @@ Nonetheless, backfilling tests still helps with thinking about areas that might 
 
 Styling is super basic, but at least it doesn't look like it was written by a COBOL coder! There are some layout shift and alignment issues that I would fix ideally, and all the inputs are ugly as hell.
 
+There are definitely areas ripe for refactoring. Things could be broken into sub-components, although where they aren't reused currently this is a stylistic choice rather than practical, and there are some small bits of repetition that could be abstracted.
+
 Here are the acceptance criteria, with a few notes. All of them have been fulfilled.
 
 * As a user, I want to be able to browse through the list of images.
