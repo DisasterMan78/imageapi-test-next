@@ -14,7 +14,7 @@ const FetchApiOnClient = async (apiURL: string) => {
 
     data = await response.json();
   } catch (error) {
-    console.error('Error fetching data: ', error)
+    return Error('Failed to fetch data', error as ErrorOptions);
   }
 
   return data;
