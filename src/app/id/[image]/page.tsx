@@ -87,6 +87,7 @@ const ImageEditor = () => {
                         Width:
                       </label>
                       <input
+                        autoFocus
                         type="text"
                         id="edit-width"
                         value={editedSize.width ?? ""}
@@ -119,6 +120,7 @@ const ImageEditor = () => {
                       <input
                         type="checkbox"
                         id="edit-grayscale"
+                        data-testid="edit-grayscale"
                         checked={grayscale}
                         onChange={() => setGrayscale(!grayscale)}
                       />
@@ -143,11 +145,15 @@ const ImageEditor = () => {
                   <div data-testid="edit-preview">
                     Image preview:
                     <div>
-                      <Thumbnail {...image as PicsumImage} />
+                      <Thumbnail
+                        data-testid="preview-image"
+                        {...image as PicsumImage}
+                      />
                     </div>
                   </div>
                   <div>
                     <Link
+                      data-testid="get-image-button"
                       href={getDownloadURL(image?.download_url as string, editedSize, grayscale, blur)}
                       target="_blank"
                     >

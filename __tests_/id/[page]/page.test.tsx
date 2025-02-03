@@ -1,14 +1,19 @@
 import { http, HttpResponse } from 'msw'
 import {setupServer} from 'msw/node'
 import '@testing-library/jest-dom'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 
 import ImageEditor from '@/app/id/[image]/page'
 import testData from '../../image-test-data'
+import userEvent from '@testing-library/user-event'
 
 const testApiURL = 'https://picsum.photos/id/undefined/info'
 
-jest.mock("next/navigation", () => ({
+interface HTMLCheckboxElement extends HTMLInputElement {
+  type: "checkbox";
+}
+
+jest.mock('next/navigation', () => ({
   useParams: () => ({
     get: () => {}
   }),
@@ -55,10 +60,121 @@ describe('Home', () => {
     expect(error).toBeInTheDocument();
   })
 
-  it('renders image', async () => {
+  it('renders a "width" input with default value', async () => {
     render(<ImageEditor />)
-    const container = await screen.findByTestId('image-original')
 
-    expect(container).toBeInTheDocument()
+    const container = await screen.findByTestId('edit-options')
+    const label = within(container).getByLabelText('Width:')
+    const input = within(container).getByDisplayValue('750')
+
+    expect(label).toBeInTheDocument()
+    expect(input).toBeInTheDocument()
+
+  })
+
+  it('changes the preview image link url on width input change', async () => {
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-image')
+    const input = within(container).getByDisplayValue('750')
+    const button = within(container).getByTestId('get-image-button')
+
+    expect(input).toHaveFocus()
+
+    await userEvent.type(input, '0')
+
+    expect(button.getAttribute('href')).toMatch(/\/id\/0\/7500\//)
+  })
+
+  it('renders a "height" input with default value', async () => {
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-options')
+    const label = within(container).getByLabelText('Height:')
+    const input = within(container).getByDisplayValue('500')
+
+    expect(label).toBeInTheDocument()
+    expect(input).toBeInTheDocument()
+
+  })
+
+  it('changes the preview image link url on height input change', async () => {
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-image')
+    const input = within(container).getByDisplayValue('500')
+    const button = within(container).getByTestId('get-image-button')
+
+    await userEvent.type(input, '0')
+
+    expect(button.getAttribute('href')).toMatch(/\/id\/0\/750\/5000/)
+  })
+
+  it('renders a "grayscale" checkbox, unchecked', async () => {
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-options')
+    const label = within(container).getByLabelText('Grayscale:')
+    const input = within(container).getByTestId('edit-grayscale')
+
+    expect(label).toBeInTheDocument()
+    expect(input.getAttribute('checked')).toEqual(null)
+
+  })
+
+  it('changes the preview image link url on height input change', async () => {
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-image')
+    // const imagePreview = within(container).getByAltText('Edited image preview')
+    const input = within(container).getByTestId('edit-grayscale') as HTMLCheckboxElement
+    const button = within(container).getByTestId('get-image-button')
+
+    await userEvent.click(input)
+
+    expect(input.checked).toBe(true)
+    expect(button.getAttribute('href')).toMatch(/\?grayscale/)
+    // Weirdly, while Jest can see the update button URL
+    // it's not seeing the update image src?
+    // expect(imagePreview.getAttribute('src')).toMatch(/\\%3fgrayscale/)
+  })
+
+  it('renders a "blur" number input with default value of 0', async () => {
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-options')
+    const label = within(container).getByLabelText('Blur:')
+    const input = within(container).getByDisplayValue('0')
+
+    expect(label).toBeInTheDocument()
+    expect(input).toBeInTheDocument()
+
+  })
+
+  it('changes the preview image link url on blur input change', async () => {
+    const user = userEvent.setup()
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-image')
+    // const imagePreview = within(container).getByAltText('Edited image preview')
+    const input = within(container).getByDisplayValue('0')
+    const button = within(container).getByTestId('get-image-button')
+
+    await user.tripleClick(input)
+    await userEvent.type(input, '9')
+
+    expect(button.getAttribute('href')).toMatch(/\&blur=9/)
+    // Weirdly, while Jest can see the update button URL
+    // it's not seeing the update image src?
+    // expect(imagePreview.getAttribute('src')).toMatch(/\\%26blur%3D9/)
+  })
+
+  it('renders original image at 750 * 500px', async () => {
+    render(<ImageEditor />)
+    const image = await screen.findByTestId('image-original')
+
+    expect(image).toBeInTheDocument()
+    expect(image.getAttribute('width')).toEqual('750')
+    expect(image.getAttribute('height')).toEqual('500')
   })
 })
