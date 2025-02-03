@@ -52,7 +52,7 @@ describe('ImageGrid', () => {
 
     items.forEach(async (item, index) => {
       const button = within(item).getByRole('button')
-      // console.log(button)
+
       expect(button).toBeInTheDocument()
       expect(button.getAttribute('value')).toEqual(testData[index].id)
       await user.click(button)
