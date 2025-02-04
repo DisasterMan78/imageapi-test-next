@@ -3,11 +3,11 @@ import {setupServer} from 'msw/node'
 import '@testing-library/jest-dom'
 import { render, screen, within } from '@testing-library/react'
 
-import ImageEditor from '@/app/id/[image]/page'
+import ImageEditor, { editorDefaults, LocalStorageImages } from '@/app/id/[image]/page'
 import testData from '../../image-test-data'
 import userEvent from '@testing-library/user-event'
 
-const testApiURL = 'https://picsum.photos/id/undefined/info'
+const testApiURL = 'https://picsum.photos/id/0/info'
 
 interface HTMLCheckboxElement extends HTMLInputElement {
   type: "checkbox";
@@ -15,9 +15,27 @@ interface HTMLCheckboxElement extends HTMLInputElement {
 
 jest.mock('next/navigation', () => ({
   useParams: () => ({
-    get: () => {}
+    image: 0
   }),
 }));
+
+const mockLocalStorage = ((storeOverride?) => {
+  const store = storeOverride || {} as LocalStorageImages;
+
+  return {
+    getItem: jest.fn((key: string) => {
+      return store[key] || null;
+    }),
+
+    setItem: jest.fn((key: string, value: string) => {
+      store[key] = value;
+    }),
+  }
+})()
+
+Object.defineProperty(window, "localStorage", {
+  value: mockLocalStorage,
+})
 
 const server = setupServer(
   http.get(testApiURL, () => {
@@ -30,6 +48,12 @@ afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
 describe('Home', () => {
+  beforeEach(() => {
+    window.localStorage.setItem('image-id-0', JSON.stringify(editorDefaults));
+    jest.clearAllMocks();
+  })
+
+
   it('renders a heading', () => {
     render(<ImageEditor />)
 
@@ -38,6 +62,7 @@ describe('Home', () => {
     expect(heading).toHaveTextContent('Snowplow test - Edit Image')
   })
 
+
   it('shows loading before image data received', () => {
     render(<ImageEditor />)
 
@@ -45,6 +70,7 @@ describe('Home', () => {
 
     expect(loading).toHaveTextContent('Loading image')
   })
+
 
   it('displays an error if API call fails', async () => {
     server.use(
@@ -60,6 +86,17 @@ describe('Home', () => {
     expect(error).toBeInTheDocument();
   })
 
+
+  it('renders original image at 750 * 500px', async () => {
+    render(<ImageEditor />)
+    const image = await screen.findByTestId('image-original') as HTMLImageElement
+
+    expect(image).toBeInTheDocument()
+    expect(image.width).toEqual(750)
+    expect(image.height).toEqual(500)
+  })
+
+
   it('renders a "width" input with default value', async () => {
     render(<ImageEditor />)
 
@@ -72,19 +109,27 @@ describe('Home', () => {
 
   })
 
-  it('changes the preview image link url on width input change', async () => {
+
+  it('width input change: changes the preview image link url and updates localStorage', async () => {
     render(<ImageEditor />)
 
     const container = await screen.findByTestId('edit-image')
     const input = within(container).getByDisplayValue('750')
-    const button = within(container).getByTestId('get-image-button')
+    const anchor = within(container).getByTestId('get-image-link') as HTMLAnchorElement
 
     expect(input).toHaveFocus()
 
     await userEvent.type(input, '0')
 
-    expect(button.getAttribute('href')).toMatch(/\/id\/0\/7500\//)
+    expect(anchor.href).toMatch(/\/id\/0\/7500\//)
+
+    expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(1)
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith('image-id-0', JSON.stringify({
+      ...editorDefaults,
+      width: 7500,
+    }))
   })
+
 
   it('renders a "height" input with default value', async () => {
     render(<ImageEditor />)
@@ -98,46 +143,62 @@ describe('Home', () => {
 
   })
 
-  it('changes the preview image link url on height input change', async () => {
+
+  it('height input change: changes the preview image link url and updates localStorage', async () => {
     render(<ImageEditor />)
 
     const container = await screen.findByTestId('edit-image')
     const input = within(container).getByDisplayValue('500')
-    const button = within(container).getByTestId('get-image-button')
+    const anchor = within(container).getByTestId('get-image-link') as HTMLAnchorElement
 
     await userEvent.type(input, '0')
 
-    expect(button.getAttribute('href')).toMatch(/\/id\/0\/750\/5000/)
+    expect(anchor.href).toMatch(/id\/0\/750\/5000/)
+
+    expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(1)
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith('image-id-0', JSON.stringify({
+      ...editorDefaults,
+      height: 5000,
+    }))
   })
+
 
   it('renders a "grayscale" checkbox, unchecked', async () => {
     render(<ImageEditor />)
 
     const container = await screen.findByTestId('edit-options')
     const label = within(container).getByLabelText('Grayscale:')
-    const input = within(container).getByTestId('edit-grayscale')
+    const input = within(container).getByTestId('edit-grayscale') as HTMLCheckboxElement
 
     expect(label).toBeInTheDocument()
-    expect(input.getAttribute('checked')).toEqual(null)
+    expect(input.checked).toEqual(false)
 
   })
 
-  it('changes the preview image link url on height input change', async () => {
+
+  it('grayscale input change: changes the preview image link url and updates localStorage', async () => {
     render(<ImageEditor />)
 
     const container = await screen.findByTestId('edit-image')
-    // const imagePreview = within(container).getByAltText('Edited image preview')
+    // const imagePreview = within(container).getByAltText('Edited image preview') as HTMLImageElement
     const input = within(container).getByTestId('edit-grayscale') as HTMLCheckboxElement
-    const button = within(container).getByTestId('get-image-button')
+    const anchor = within(container).getByTestId('get-image-link') as HTMLAnchorElement
 
     await userEvent.click(input)
 
     expect(input.checked).toBe(true)
-    expect(button.getAttribute('href')).toMatch(/\?grayscale/)
+    expect(anchor.href).toMatch(/\?grayscale/)
     // Weirdly, while Jest can see the update button URL
-    // it's not seeing the update image src?
-    // expect(imagePreview.getAttribute('src')).toMatch(/\\%3fgrayscale/)
+    // it's not seeing the updated image src?
+    // expect(imagePreview.src).toMatch(/\\%3fgrayscale/)
+
+    expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(1)
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith('image-id-0', JSON.stringify({
+      ...editorDefaults,
+      grayscale: true,
+    }))
   })
+
 
   it('renders a "blur" number input with default value of 0', async () => {
     render(<ImageEditor />)
@@ -151,30 +212,51 @@ describe('Home', () => {
 
   })
 
-  it('changes the preview image link url on blur input change', async () => {
+
+  it('blur input change: changes the preview image link url and updates localStorage', async () => {
     const user = userEvent.setup()
     render(<ImageEditor />)
 
     const container = await screen.findByTestId('edit-image')
-    // const imagePreview = within(container).getByAltText('Edited image preview')
+    // const imagePreview = within(container).getByAltText('Edited image preview') as HTMLImageElement
     const input = within(container).getByDisplayValue('0')
-    const button = within(container).getByTestId('get-image-button')
-
+    const button = within(container).getByTestId('get-image-link') as HTMLAnchorElement
     await user.tripleClick(input)
     await userEvent.type(input, '9')
 
-    expect(button.getAttribute('href')).toMatch(/\&blur=9/)
+    expect(button.href).toMatch(/\&blur=9/)
     // Weirdly, while Jest can see the update button URL
     // it's not seeing the update image src?
-    // expect(imagePreview.getAttribute('src')).toMatch(/\\%26blur%3D9/)
+    // expect(imagePreview.src).toMatch(/\\%26blur%3D9/)
+
+    expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(1)
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith('image-id-0', JSON.stringify({
+      ...editorDefaults,
+      blur: 9,
+    }))
   })
 
-  it('renders original image at 750 * 500px', async () => {
-    render(<ImageEditor />)
-    const image = await screen.findByTestId('image-original')
+  it('restores input values from localStorage', async () => {
+    const lsValues = {
+      width: "567",
+      height: "876",
+      grayscale: true,
+      blur: "5",
+    }
 
-    expect(image).toBeInTheDocument()
-    expect(image.getAttribute('width')).toEqual('750')
-    expect(image.getAttribute('height')).toEqual('500')
+    window.localStorage.getItem = () => JSON.stringify(lsValues);
+
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-image')
+    const widthInput = within(container).getByLabelText('Width:') as HTMLInputElement
+    const heightInput = within(container).getByLabelText('Height:') as HTMLInputElement
+    const grayscaleInput = within(container).getByLabelText('Grayscale:') as HTMLCheckboxElement
+    const blurInput = within(container).getByLabelText('Blur:') as HTMLInputElement
+
+    expect(widthInput.value).toEqual(lsValues.width)
+    expect(heightInput.value).toEqual(lsValues.height)
+    expect(grayscaleInput.checked).toEqual(lsValues.grayscale)
+    expect(blurInput.value).toEqual(lsValues.blur)
   })
 })

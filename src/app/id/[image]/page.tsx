@@ -18,30 +18,40 @@ type EditedSize = {
   height: number,
 }
 
+export type ImageOptions = {
+  width: number,
+  height: number,
+  grayscale: boolean,
+  blur: number,
+}
+
+export type LocalStorageImages = {
+  [key: string]: string,
+}
+
+const thumbnailWidth = 300;
+const thumbnailHeight = 200;
+const imageSizeFactor = 2.5;
+const imageWidth = thumbnailWidth * imageSizeFactor;
+const imageHeight = thumbnailHeight * imageSizeFactor;
+
+export const editorDefaults = {
+  width: imageWidth,
+  height: imageHeight,
+  grayscale: false,
+  blur: 0,
+};
+
 const ImageEditor = () => {
-  const thumbnailWidth = 300;
-  const thumbnailHeight = 200;
-  const imageSizeFactor = 2.5;
-  const imageWidth = thumbnailWidth * imageSizeFactor;
-  const imageHeight = thumbnailHeight * imageSizeFactor;
-  const editorInitialValues = {
-    width: imageWidth,
-    height: imageHeight,
-    grayscale: false,
-    blur: 0,
-  }
   const params = useParams();
+  let itemStorage = null;
 
   if (typeof window !== "undefined") {
     const storageId = `image-id-${params.image}`;
-    const itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
-    if (itemStorage) {
-      editorInitialValues.width = itemStorage.width;
-      editorInitialValues.height = itemStorage.height;
-      editorInitialValues.grayscale = itemStorage.grayscale;
-      editorInitialValues.blur = itemStorage.blur;
-    }
+
+    itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
   }
+  const editorInitialValues: ImageOptions = itemStorage || editorDefaults;
 
   const [image, setImage] = useState<PicsumImage>();
   const [dataIsLoading, setDataIsLoading] = useState(true);
@@ -77,7 +87,7 @@ const ImageEditor = () => {
     )
   }
 
-  const getDownloadURL = (url: string, editedSize: EditedSize, graysclae: boolean, blur: number) => url.replace(/\d*\/\d*$/, `${editedSize.width}/${editedSize.height}?${grayscale ? 'grayscale' : ''}${blur > 0 ? `&blur=${blur}` : ''}`);
+  const getDownloadURL = (url: string, editedSize: EditedSize, grayscale: boolean, blur: number) => url.replace(/\d*\/\d*$/, `${editedSize.width}/${editedSize.height}?${grayscale ? 'grayscale' : ''}${blur > 0 ? `&blur=${blur}` : ''}`);
 
   const onHeightChange = (e: ChangeEvent<HTMLInputElement>) => {
     const height = parseInt(e.currentTarget.value);
@@ -225,7 +235,7 @@ const ImageEditor = () => {
                   </div>
                   <div>
                     <Link
-                      data-testid="get-image-button"
+                      data-testid="get-image-link"
                       href={getDownloadURL(image?.download_url as string, editedSize, grayscale, blur)}
                       target="_blank"
                     >
