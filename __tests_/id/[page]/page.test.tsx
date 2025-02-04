@@ -19,8 +19,8 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 
-const mockLocalStorage = ((storeOverride?) => {
-  const store = storeOverride || {} as LocalStorageImages;
+const mockLocalStorage = (() => {
+  const store = {} as LocalStorageImages;
 
   return {
     getItem: jest.fn((key: string) => {
@@ -29,6 +29,10 @@ const mockLocalStorage = ((storeOverride?) => {
 
     setItem: jest.fn((key: string, value: string) => {
       store[key] = value;
+    }),
+
+    removeItem: jest.fn((key: string) => {
+      delete store[key];
     }),
   }
 })()
@@ -49,8 +53,8 @@ afterAll(() => server.close())
 
 describe('Home', () => {
   beforeEach(() => {
-    window.localStorage.setItem('image-id-0', JSON.stringify(editorDefaults));
     jest.clearAllMocks();
+    window.localStorage.removeItem('image-id-0')
   })
 
 
@@ -81,7 +85,7 @@ describe('Home', () => {
 
     render(<ImageEditor />)
 
-    const error = await screen.findByText('Failed to fetch data')
+    const error = await screen.findByText(/Failed to fetch data/)
 
     expect(error).toBeInTheDocument();
   })
@@ -123,7 +127,7 @@ describe('Home', () => {
 
     expect(anchor.href).toMatch(/\/id\/0\/7500\//)
 
-    expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(1)
+    expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(2)
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith('image-id-0', JSON.stringify({
       ...editorDefaults,
       width: 7500,
@@ -155,7 +159,7 @@ describe('Home', () => {
 
     expect(anchor.href).toMatch(/id\/0\/750\/5000/)
 
-    expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(1)
+    expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(2)
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith('image-id-0', JSON.stringify({
       ...editorDefaults,
       height: 5000,
@@ -192,7 +196,7 @@ describe('Home', () => {
     // it's not seeing the updated image src?
     // expect(imagePreview.src).toMatch(/\\%3fgrayscale/)
 
-    expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(1)
+    expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(2)
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith('image-id-0', JSON.stringify({
       ...editorDefaults,
       grayscale: true,
@@ -229,7 +233,7 @@ describe('Home', () => {
     // it's not seeing the update image src?
     // expect(imagePreview.src).toMatch(/\\%26blur%3D9/)
 
-    expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(1)
+    expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(2)
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith('image-id-0', JSON.stringify({
       ...editorDefaults,
       blur: 9,

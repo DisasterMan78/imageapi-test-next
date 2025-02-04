@@ -50,8 +50,13 @@ const ImageEditor = () => {
     const storageId = `image-id-${params.image}`;
 
     itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
+
+    if (itemStorage == null) {
+      localStorage.setItem(storageId, JSON.stringify(editorDefaults));
+      itemStorage = editorDefaults;
+    }
   }
-  const editorInitialValues: ImageOptions = itemStorage || editorDefaults;
+  const editorInitialValues: ImageOptions = itemStorage;
 
   const [image, setImage] = useState<PicsumImage>();
   const [dataIsLoading, setDataIsLoading] = useState(true);
@@ -98,7 +103,7 @@ const ImageEditor = () => {
 
     if (typeof window !== "undefined") {
       const storageId = `image-id-${e.currentTarget.getAttribute('data-imageid')}`;
-      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string) || editorInitialValues;
+      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
 
       itemStorage.height = height;
       localStorage.setItem(storageId, JSON.stringify(itemStorage))
@@ -114,7 +119,7 @@ const ImageEditor = () => {
 
     if (typeof window !== "undefined") {
       const storageId = `image-id-${e.currentTarget.getAttribute('data-imageid')}`;
-      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string) || editorInitialValues;
+      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
 
       itemStorage.width = width;
       localStorage.setItem(storageId, JSON.stringify(itemStorage))
@@ -127,7 +132,7 @@ const ImageEditor = () => {
 
     if (typeof window !== "undefined") {
       const storageId = `image-id-${e.currentTarget.getAttribute('data-imageid')}`;
-      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string) || editorInitialValues;
+      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
 
       itemStorage.grayscale = grayscale;
       localStorage.setItem(storageId, JSON.stringify(itemStorage))
@@ -140,7 +145,7 @@ const ImageEditor = () => {
 
     if (typeof window !== "undefined") {
       const storageId = `image-id-${e.currentTarget.getAttribute('data-imageid')}`;
-      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string) || editorInitialValues;
+      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
 
       itemStorage.blur = blur;
       localStorage.setItem(storageId, JSON.stringify(itemStorage))
@@ -175,7 +180,7 @@ const ImageEditor = () => {
                         type="text"
                         id="edit-width"
                         data-imageid={image?.id}
-                        value={editedSize.width ?? ""}
+                        value={editedSize.width}
                         onChange={(e) => onWidthChange(e)}
                       />
                     </div>
@@ -189,7 +194,7 @@ const ImageEditor = () => {
                         type="text"
                         id="edit-height"
                         data-imageid={image?.id}
-                        value={editedSize.height ?? ""}
+                        value={editedSize.height}
                         onChange={(e) => onHeightChange(e)}
                       />
                     </div>
@@ -219,7 +224,7 @@ const ImageEditor = () => {
                         min="0"
                         max="10"
                         step="1"
-                        value={blur ?? 0}
+                        value={blur}
                         onChange={(e) => onBlurChange(e)}
                       />
                     </div>
