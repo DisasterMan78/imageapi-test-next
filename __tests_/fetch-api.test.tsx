@@ -30,12 +30,8 @@ describe('api fetch tests', () => {
       }),
     )
 
-    try {
-      await FetchApiOnClient(testApiURL)
-    // error objects are deliberately of unknown type in TS
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      expect(e.message).toEqual('Failed to fetch data');
-    }
+    const response = await FetchApiOnClient(testApiURL)
+
+    expect(response.message).toEqual('Failed to fetch data: 500 - Internal Server Error')
   })
 })

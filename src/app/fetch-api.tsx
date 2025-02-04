@@ -9,12 +9,12 @@ const FetchApiOnClient = async (apiURL: string) => {
     });
 
     if (response.status !== 200) {
-      return Error('Failed to fetch data');
+      throw Error(`Failed to fetch data: ${response.status} - ${response.statusText}`);
     }
 
     data = await response.json();
   } catch (error) {
-    return Error('Failed to fetch data', error as ErrorOptions);
+    return error;
   }
 
   return data;
