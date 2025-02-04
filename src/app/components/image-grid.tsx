@@ -62,9 +62,9 @@ const ImageGrid = ({imageData, APILimit, thumbnailWidth, thumbnailHeight, page, 
   }
 
   return (
-    <div data-testid="image-grid">
+    <div data-testid="image-grid-container">
       <Navigation { ...navProps } />
-      <ul className={styles.thumbnailGrid}>
+      <ul data-testid="image-grid" className={styles.thumbnailGrid}>
         {
           imageData.length > 0 && imageData.map(image => (
             <li key={image.id}>

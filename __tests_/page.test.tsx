@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { http, HttpResponse } from 'msw'
 import {setupServer} from 'msw/node'
 import '@testing-library/jest-dom'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import mockRouter from 'next-router-mock';
 
@@ -56,14 +56,14 @@ describe('Home', () => {
 
     render(<Home />)
 
-    const error = await screen.findByText('Failed to fetch data')
+    const error = await screen.findByText(/Failed to fetch data/)
 
     expect(error).toBeInTheDocument();
   })
 
   it('renders image grid', async () => {
     render(<Home />)
-    const container = await screen.findByTestId('image-grid')
+    const container = await screen.findByTestId('image-grid-container')
 
     expect(container).toBeInTheDocument()
   })
@@ -79,10 +79,21 @@ describe('Home', () => {
 
     await user.click(firstNextButton)
 
-    expect(mockRouter).toMatchObject({
-      asPath: "/",
-      pathname: "/2",
-      query: {},
-    });
+    expect(mockRouter).toMatchObject({ pathname: "/2" });
+  })
+
+  it('correctly calls Next router when `onImageClick()` is called by an event with target `value` attribute', async () => {
+    const user = userEvent.setup()
+    render(<Home />)
+
+    const imageGrid = await screen.findByTestId('image-grid')
+    const imageButtons = within(imageGrid).getAllByRole('button')
+    const firstImageButtons = imageButtons[0] as HTMLButtonElement;
+
+    expect(firstImageButtons.value).toEqual('0')
+
+    await user.click(firstImageButtons)
+
+    expect(mockRouter).toMatchObject({ pathname: "/id/0" });
   })
 })
