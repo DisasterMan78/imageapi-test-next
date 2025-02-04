@@ -66,8 +66,10 @@ describe('ImageGrid', () => {
     const user = userEvent.setup()
     render(<ImageGrid { ...imageGridProps} />)
 
-    const nextButton = screen.getAllByRole('button', { name: /Next page/ })[0];
-    expect(nextButton.getAttribute('value')).toEqual('2')
+    const nextButton = screen.getAllByRole('button', { name: /Next page/ })[0] as HTMLButtonElement
+
+    expect(nextButton.value).toEqual('2')
+
     await user.click(nextButton)
 
     expect(imageGridProps.onNavClick).toHaveBeenCalled()
@@ -77,9 +79,11 @@ describe('ImageGrid', () => {
     const user = userEvent.setup()
     render(<ImageGrid {...{ ...imageGridProps, page: 2}} />)
 
-    const nextButton = screen.getAllByRole('button', { name: /Prev page/ })[0];
-    expect(nextButton.getAttribute('value')).toEqual('1')
-    await user.click(nextButton)
+    const prevButton = screen.getAllByRole('button', { name: /Prev page/ })[0] as HTMLButtonElement
+
+    expect(prevButton.value).toEqual('1')
+
+    await user.click(prevButton)
 
     expect(imageGridProps.onNavClick).toHaveBeenCalled()
   })

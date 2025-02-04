@@ -51,10 +51,11 @@ describe('ImageGrid', () => {
     const items = screen.getAllByRole('listitem')
 
     items.forEach(async (item, index) => {
-      const button = within(item).getByRole('button')
+      const button = within(item).getByRole('button') as HTMLButtonElement
 
       expect(button).toBeInTheDocument()
-      expect(button.getAttribute('value')).toEqual(testData[index].id)
+      expect(button.value).toEqual(testData[index].id)
+
       await user.click(button)
 
       expect(imageGridProps.onImageClick).toHaveBeenCalled()
