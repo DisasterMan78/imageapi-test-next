@@ -22,8 +22,10 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## Test Notes
 
 The majority of the project has been done with a TDD approach - you can see this process in the git commit history.
-I will confess to cutting some corners towards the end (I am only human!) with the edit image functionality, but I have backfilled the tests for that after (barring localStorage).  Not my preferred approach, but the functionality was simple enough that I was able to go forward with a high degree of confidence.
+I will confess to cutting some corners towards the end (I am only human!) with the edit image functionality, but I have backfilled the tests for that after.  Not my preferred approach, but the functionality was simple enough that I was able to go forward with a high degree of confidence.
 Nonetheless, backfilling tests still helps with thinking about areas that might have been missed, so it is worth it.
+
+*UPDATE:* localStorage now tested, and other branches have been covered. Coverage isn't _quite_ a perfect 100% coverage score, but the remaining branches on `src/app/id/[image]/page.tsx` seem to be false negatives.
 
 Styling is super basic, but at least it doesn't look like it was written by a COBOL coder! There are some layout shift and alignment issues that I would fix ideally, and all the inputs are ugly as hell.
 
