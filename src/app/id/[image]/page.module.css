@@ -1,12 +1,21 @@
 .editImage {
   display: flex;
   flex-direction: row;
-  font-size: 1.2rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: stretch;
+  align-content: stretch;
 }
 
 .editImage button {
   font-size: 1rem;
   padding: 0.5rem;
+}
+
+.editorUI {
+  display: block;
+  flex-shrink: 0;
+  flex-basis: 30%;
 }
 
 .editControl {
@@ -19,10 +28,19 @@
   margin-left: 0.5rem;
 }
 
+.editedDisplay {
+  display: block;
+  flex-basis: 70%;
+}
+
 .imagePreview, .imageOriginal {
   background-color: #333;
 }
 
 .imagePreview {
   margin-right: 1rem;
+}
+
+.experimental {
+  flex-basis: 100%;
 }
