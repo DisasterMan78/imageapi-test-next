@@ -1,5 +1,5 @@
 "use client"
-import styles from "./image-grid.module.css";
+import styles from './image-grid.module.css';
 import Image from 'next/image'
 
 export type PicsumImage = {
@@ -23,7 +23,7 @@ export type ImageGridProps = {
   thumbnailWidth: number,
   thumbnailHeight: number,
   onImageClick: (event: MouseEvent) => void,
-} & Omit<NavigationProps, "resultCount">;
+} & Omit<NavigationProps, 'resultCount'>;
 
 const Navigation = ({ page, APILimit, resultCount, onNavClick }: NavigationProps) => (
   <div role="navigation" className={styles.navContainer}>

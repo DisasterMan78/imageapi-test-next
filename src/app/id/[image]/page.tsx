@@ -285,7 +285,7 @@ const ImageEditor = () => {
     <div className={homeStyles.page}>
       <main className={homeStyles.main}>
         <h1 role="heading" aria-level={1}>
-          Picsum Api test - Edit Image
+          Picsum API test - Edit Image
         </h1>
         {dataIsLoading === true ? (
           <div className={homeStyles.loadingIndicator} role="progressbar">
