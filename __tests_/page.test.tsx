@@ -11,7 +11,7 @@ import testData from './image-test-data';
 
 const testApiURL = 'https://picsum.photos/v2/list';
 
-jest.mock("next/navigation", () => ({
+jest.mock('next/navigation', () => ({
   useRouter,
   useParams: () => ({
     get: () => {}
@@ -79,7 +79,7 @@ describe('Home', () => {
 
     await user.click(firstNextButton)
 
-    expect(mockRouter).toMatchObject({ pathname: "/2" });
+    expect(mockRouter).toMatchObject({ pathname: '/2' });
   })
 
   it('correctly calls Next router when `onImageClick()` is called by an event with target `value` attribute', async () => {

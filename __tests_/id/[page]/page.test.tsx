@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event'
 const testApiURL = 'https://picsum.photos/id/0/info'
 
 interface HTMLCheckboxElement extends HTMLInputElement {
-  type: "checkbox";
+  type: 'checkbox';
 }
 
 jest.mock('next/navigation', () => ({
@@ -37,7 +37,7 @@ const mockLocalStorage = (() => {
   }
 })()
 
-Object.defineProperty(window, "localStorage", {
+Object.defineProperty(window, 'localStorage', {
   value: mockLocalStorage,
 })
 
@@ -242,10 +242,10 @@ describe('Home', () => {
 
   it('restores input values from localStorage', async () => {
     const lsValues = {
-      width: "567",
-      height: "876",
+      width: '567',
+      height: '876',
       grayscale: true,
-      blur: "5",
+      blur: '5',
     }
 
     window.localStorage.getItem = () => JSON.stringify(lsValues);

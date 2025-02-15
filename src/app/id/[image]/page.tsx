@@ -6,25 +6,25 @@ import {
   useEffect,
   useRef,
   useState,
-} from "react";
-import { useParams } from "next/navigation";
-import Image from "next/image";
+} from 'react';
+import { useParams } from 'next/navigation';
+import Image from 'next/image';
 
-import homeStyles from "../../page.module.css";
-import styles from "./page.module.css";
+import homeStyles from '../../page.module.css';
+import styles from './page.module.css';
 
-import FetchApiOnClient from "../../fetch-api";
-import LoadingSpinner from "../../components/loading-spinner";
-import { PicsumImage } from "../../components/image-grid";
-import Link from "next/link";
-import FetchImageOnClient from "@/app/fetch-image";
-import { decode, RawImageData } from "jpeg-js";
+import FetchApiOnClient from '../../fetch-api';
+import LoadingSpinner from '../../components/loading-spinner';
+import { PicsumImage } from '../../components/image-grid';
+import Link from 'next/link';
+import FetchImageOnClient from '@/app/fetch-image';
+import { decode, RawImageData } from 'jpeg-js';
 import {
   convertToGrayscale,
   getImageDataBuffer,
   invertPixelColour,
   rgbaArray,
-} from "@/app/utils/image-processing";
+} from '@/app/utils/image-processing';
 
 type APIError = false | string;
 type EditedSize = {
@@ -70,8 +70,8 @@ const getDownloadURL = (
 ) =>
   url.replace(
     /\d*\/\d*$/,
-    `${editedSize.width}/${editedSize.height}?${grayscale ? "grayscale" : ""}${
-      blur > 0 ? `&blur=${blur}` : ""
+    `${editedSize.width}/${editedSize.height}?${grayscale ? 'grayscale' : ''}${
+      blur > 0 ? `&blur=${blur}` : ''
     }`
   );
 
@@ -81,7 +81,7 @@ const CanvasImage = (props: CanvasProps) => {
   useEffect(() => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
-      const context = canvas.getContext("2d");
+      const context = canvas.getContext('2d');
 
       canvas.width = props.width;
       canvas.height = props.height;
@@ -95,7 +95,7 @@ const ImageEditor = () => {
   const params = useParams();
   let itemStorage = null;
 
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     const storageId = `image-id-${params.image}`;
 
     itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
@@ -139,8 +139,8 @@ const ImageEditor = () => {
     const thumbnailURL = (url: string) =>
       url.replace(
         /\d*\/\d*$/,
-        `${thumbnailWidth}/${thumbnailHeight}?${grayscale ? "grayscale" : ""}${
-          blur > 0 ? `&blur=${blur}` : ""
+        `${thumbnailWidth}/${thumbnailHeight}?${grayscale ? 'grayscale' : ''}${
+          blur > 0 ? `&blur=${blur}` : ''
         }`
       );
 
@@ -150,37 +150,37 @@ const ImageEditor = () => {
         width={thumbnailWidth}
         height={thumbnailHeight}
         src={thumbnailURL(imageData.download_url)}
-        alt={"Edited image preview"}
+        alt={'Edited image preview'}
       />
     );
   };
 
   const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const inputName = e.currentTarget.getAttribute("data-name");
+    const inputName = e.currentTarget.getAttribute('data-name');
     const value =
-      inputName === "grayscale"
+      inputName === 'grayscale'
         ? e.currentTarget.checked
         : parseInt(e.currentTarget.value);
     switch (inputName) {
-      case "height":
+      case 'height':
         setEditedSize({
           height: value as number,
           width: editedSize.width,
         });
 
         break;
-      case "width":
+      case 'width':
         setEditedSize({
           height: editedSize.height,
           width: value as number,
         });
 
         break;
-      case "grayscale":
+      case 'grayscale':
         setGrayscale(value as boolean);
 
         break;
-      case "blur":
+      case 'blur':
         setBlur(value as number);
 
         break;
@@ -188,9 +188,9 @@ const ImageEditor = () => {
       default:
         break;
     }
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const storageId = `image-id-${e.currentTarget.getAttribute(
-        "data-imageid"
+        'data-imageid'
       )}`;
       const itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
 
@@ -203,7 +203,7 @@ const ImageEditor = () => {
     setConvertWithJS(true);
     setConversionInProgress(true);
     setConvertedImage(null);
-    const url = e.currentTarget.getAttribute("data-image-url") as string;
+    const url = e.currentTarget.getAttribute('data-image-url') as string;
     const functionName = e.currentTarget.getAttribute('data-processing-fn');
     const imageData = (await FetchImageOnClient(url)) as Blob;
     const imageDataBuffer = (await getImageDataBuffer(

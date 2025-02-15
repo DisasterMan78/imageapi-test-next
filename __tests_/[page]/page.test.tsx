@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react'
 
 import Page from '@/app/[page]/page'
 
-jest.mock("next/navigation", () => ({
+jest.mock('next/navigation', () => ({
   useRouter,
   useParams: () => ({
     get: () => {}

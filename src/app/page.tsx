@@ -1,13 +1,13 @@
 "use client"
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation'
 
-import styles from "./page.module.css";
-import FetchApiOnClient from "./fetch-api";
+import styles from './page.module.css';
+import FetchApiOnClient from './fetch-api';
 
-import LoadingSpinner from "./components/loading-spinner";
+import LoadingSpinner from './components/loading-spinner';
 import ImageGrid, { ImageGridProps } from './components/image-grid';
-import { PicsumImage } from "./components/image-grid";
+import { PicsumImage } from './components/image-grid';
 
 type APIError = false | string;
 
