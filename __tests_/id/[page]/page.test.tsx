@@ -63,7 +63,7 @@ describe('Home', () => {
 
     const heading = screen.getByRole('heading', { level: 1 })
 
-    expect(heading).toHaveTextContent('Snowplow test - Edit Image')
+    expect(heading).toHaveTextContent('Picsum API test - Edit Image')
   })
 
 

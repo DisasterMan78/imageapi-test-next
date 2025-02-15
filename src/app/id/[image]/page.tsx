@@ -155,7 +155,7 @@ const ImageEditor = () => {
   return (
     <div className={homeStyles.page}>
       <main className={homeStyles.main}>
-        <h1 role="heading" aria-level={1}>Snowplow test - Edit Image</h1>
+        <h1 role="heading" aria-level={1}>Picsum API test - Edit Image</h1>
         {
           dataIsLoading === true ?
             (<div className={homeStyles.loadingIndicator} role="progressbar">

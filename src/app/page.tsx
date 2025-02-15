@@ -63,7 +63,7 @@ const Home = () => {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <h1 role="heading" aria-level={1}>Snowplow test - Picsum API</h1>
+        <h1 role="heading" aria-level={1}>Picsum API test - Browse Images</h1>
         {
           dataIsLoading === true ?
             (<div className={styles.loadingIndicator} role="progressbar">

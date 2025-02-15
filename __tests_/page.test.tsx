@@ -36,7 +36,7 @@ describe('Home', () => {
 
     const heading = screen.getByRole('heading', { level: 1 })
 
-    expect(heading).toHaveTextContent('Snowplow test - Picsum API')
+    expect(heading).toHaveTextContent('Picsum API test - Browse Images')
   })
 
   it('shows loading before image data received', () => {

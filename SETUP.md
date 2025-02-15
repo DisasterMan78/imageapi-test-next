@@ -4,7 +4,7 @@
 * Node Version Manager (NVM)
 
 #### Create Next application
-* `$ npx create-next-app@latest snowplow-test-next`:
+* `$ npx create-next-app@latest picsumapi-test-next`:
   ```
   ✔ Would you like to use TypeScript? … Yes
   ✔ Would you like to use ESLint? … Yes
