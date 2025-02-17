@@ -10,6 +10,8 @@ type hexValueInDecimal = IntRange<0, 255>;
 export type rgbaArray = [hexValueInDecimal, hexValueInDecimal, hexValueInDecimal, hexValueInDecimal];
 
 
+export const getImageDataBuffer = async (imageData: Blob) => new Uint8Array(await imageData.arrayBuffer());
+
 export const checkImageDataIsJPEG = (imageData: Uint8Array) => {
   // JPGs have a file signature of [0xFF, 0xD8,..., 0xFF, 0xD9] - i.e. the first two
   // elements of the image data array are (in decimal) 255 and 216
@@ -59,5 +61,3 @@ export const convertToGrayscale = (rgba: rgbaArray) => {
 const invertHexValue = (hexValue: hexValueInDecimal) => 255 - hexValue;
 
 export const invertPixelColour = (rgba: rgbaArray) => [invertHexValue(rgba[0]), invertHexValue(rgba[1]), invertHexValue(rgba[2]), rgba[3]]
-
-export const getImageDataBuffer = async (imageData: Blob) => new Uint8Array(await imageData.arrayBuffer());
