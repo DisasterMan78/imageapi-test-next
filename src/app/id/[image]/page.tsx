@@ -23,6 +23,7 @@ import {
   convertToGrayscale,
   getImageDataBuffer,
   invertPixelColour,
+  locateSOSinJPEG,
   rgbaArray,
 } from '@/app/utils/image-processing';
 
@@ -209,6 +210,23 @@ const ImageEditor = () => {
     const imageDataBuffer = (await getImageDataBuffer(
       imageData
     )) as Uint8Array<ArrayBuffer>;
+
+
+
+
+    const SOSIndex = locateSOSinJPEG(imageDataBuffer);
+    const EOS = imageDataBuffer.length - 2;
+    console.log("SOSIndex", SOSIndex)
+    console.log("SOS markers", imageDataBuffer[SOSIndex - 2], imageDataBuffer[SOSIndex - 1])
+    /* This is going to log A LOT! You probably don't
+     want to do it unless your image is tiny!*/
+    for (let index = SOSIndex; index < EOS; index = index + 4) {
+      const R = imageDataBuffer[index];
+      const G = imageDataBuffer[index + 1];
+      const B = imageDataBuffer[index + 2];
+      const A = imageDataBuffer[index + 3]
+      console.log(`RGBA ${index / 4}:`, R, G, B, A)
+    }
 
     /* So I got to this point in the process then gave myself a good slap.
     JPEG data is, of course, compressed, and does NOT resemble RGBA values.
