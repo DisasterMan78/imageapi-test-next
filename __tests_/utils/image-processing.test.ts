@@ -4,7 +4,7 @@ import '@testing-library/jest-dom'
 import FetchImageOnClient from '@/app/fetch-image'
 import { waitFor } from '@testing-library/dom'
 import { checkImageDataIsJPEG, convertToGrayscale, getImageDataBuffer, invertPixelColour, locateSOSinJPEG, rgbaArray } from '@/app/utils/image-processing'
-import { pngAPIURL, testAPIURL } from '../mocks/msw'
+import { pngAPIURL, testAPIURL } from '../mocks/msw.mock'
 
 describe('api fetch tests', () => {
   it ('can get the image data buffer as a Uint8Array', async () => {

@@ -3,7 +3,7 @@ import '@testing-library/jest-dom'
 
 import FetchImageOnClient from '@/app/fetch-image'
 import { waitFor } from '@testing-library/dom'
-import { server, testAPIURL, testJPGResponse } from './mocks/msw'
+import { server, testAPIURL, testJPGResponse } from './mocks/msw.mock'
 
 describe('api fetch tests', () => {
   it('receives data from API on success', async () => {
