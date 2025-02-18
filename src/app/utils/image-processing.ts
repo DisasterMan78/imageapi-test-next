@@ -1,4 +1,5 @@
 import { RawImageData } from "jpeg-js";
+import { gaussianMapData } from "./make-gaussian-matrix";
 
 // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-5.html#tail-recursion-elimination-on-conditional-types
 type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N
@@ -155,22 +156,26 @@ const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, hIndex: number, wIn
   value += pixelMatrix[hIndex - 1][wIndex + 0][channelIndex];
   value += pixelMatrix[hIndex - 1][wIndex + 1][channelIndex];
   return value / 9;
-
 }
 
 export const gaussianBlur = (imageData: RawImageData<Buffer>) => {
   const { width, height } = imageData;
   const pixelMatrix = imageDataToPixelMatrix(imageData);
-  console.log("🚀 ~ gaussianBlur ~ pixelMatrix:", pixelMatrix)
   const buffer = new ArrayBuffer(
-    4 * imageData.width * imageData.height
+    4 * width * height
   );
   const newUint8CData = new Uint8ClampedArray(buffer);
+
+  const gaussianMatrix = gaussianMapData(width, height);
+  console.log(width, height)
+  console.log(Math.round(gaussianMatrix[0][0]))
+  console.log(Math.round(gaussianMatrix[Math.round(width / 2)][Math.round(height / 2)]))
+  console.log(Math.round(gaussianMatrix[width][height]))
 
   for (let hIndex = 0; hIndex < height; hIndex++) {
     for (let wIndex = 0; wIndex < width; wIndex++) {
       const arrayOffset = (hIndex * (width * 4))  + (wIndex * 4);
-      // First attempt, ignore first and last rows as the are more compex
+      // First attempt, ignore first and last rows as the are more complex
       if (hIndex !== 0 && hIndex !== height - 1) {
         // And ignore first and last column
         if (wIndex !== 0 && wIndex !== width - 1) {
@@ -193,5 +198,28 @@ export const gaussianBlur = (imageData: RawImageData<Buffer>) => {
     }
   }
   ;
+  return newUint8CData;
+}
+
+export const gaussianMapImageData = (width: number, height: number) => {
+  const buffer = new ArrayBuffer(
+    4 * width * height
+  );
+  const newUint8CData = new Uint8ClampedArray(buffer);
+
+  const gaussianData = gaussianMapData(width, height);
+  // console.log("🚀 ~ gaussianMap ~ gaussianData:", gaussianData)
+
+  for (let hIndex = 0; hIndex < height; hIndex++) {
+    for (let wIndex = 0; wIndex < width; wIndex++) {
+      const arrayOffset = (hIndex * (width * 4))  + (wIndex * 4);
+      // const gValue = getGaussianMatrixValue(wIndex, hIndex)
+      const gValue = gaussianData[hIndex][wIndex]
+      newUint8CData[arrayOffset + 0] = gValue;
+      newUint8CData[arrayOffset + 1] = gValue;
+      newUint8CData[arrayOffset + 2] = gValue;
+      newUint8CData[arrayOffset + 3] = 255;
+    }
+  }
   return newUint8CData;
 }

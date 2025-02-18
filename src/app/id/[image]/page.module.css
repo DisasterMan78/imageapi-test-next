@@ -44,3 +44,8 @@
 .experimental {
   flex-basis: 100%;
 }
+
+.gaussianMap {
+  display: inline-block;
+  border: 1px solid red;
+}

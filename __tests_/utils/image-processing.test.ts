@@ -1,13 +1,13 @@
-
 import '@testing-library/jest-dom'
 
 import FetchImageOnClient from '@/app/fetch-image'
 import { waitFor } from '@testing-library/dom'
-import { checkImageDataIsJPEG, convertImageDataToGrayscale, convertToGrayscale, getImageDataBuffer, imageDataToPixelMatrix, invertImageData, invertPixelColour, locateSOSinImage, RGBAArray } from '@/app/utils/image-processing'
-import { pngAPIURL, testAPIURL, testSmallJPGURL, testTinyJPGURL } from '../mocks/msw.mock'
+import { checkImageDataIsJPEG, convertImageDataToGrayscale, convertToGrayscale, gaussianBlur, getImageDataBuffer, imageDataToPixelMatrix, invertImageData, invertPixelColour, locateSOSinImage, RGBAArray } from '@/app/utils/image-processing'
+import { pngAPIURL, testAPIURL, testJPGResponse, testSmallJPGURL, testTinyJPGURL } from '../mocks/msw.mock'
 import { decode, RawImageData } from 'jpeg-js'
 import invertedSpectrumImageData from '../mocks/inverted-spectrum-image-data.mock'
 import grayscaleSpectrumImageData from '../mocks/grayscale-spectrum-image-data.mock'
+// import makeGaussianMatrix from '@/app/utils/make-gaussian-matrix'
 
 describe('api fetch tests', () => {
   it ('can get the image data buffer as a Uint8Array', async () => {
@@ -87,6 +87,20 @@ describe('api fetch tests', () => {
     const rawImageData = decode(imageDataArray) as RawImageData<Buffer>
     const pixelMatrix = imageDataToPixelMatrix(rawImageData)
 
-    console.dir(pixelMatrix, {'maxArrayLength': null})
+    // console.dir(pixelMatrix, {'maxArrayLength': null})
+  })
+
+  it('can make a 2d gaussian matrix', async () => {
+    const imageData = await FetchImageOnClient(testAPIURL) as Blob
+    const imageDataArray = await getImageDataBuffer(imageData)
+    const rawImageData = decode(imageDataArray) as RawImageData<Buffer>
+    const pixelMatrix = gaussianBlur(rawImageData)
+    // const gaussian = makeGaussianMatrix(100, 200, 200)
+
+    // console.log(gaussian(100, 100)); // ~5
+    // console.log(gaussian(200, 200)); // 300
+
+
+    // console.dir(pixelMatrix, {'maxArrayLength': null})
   })
 })

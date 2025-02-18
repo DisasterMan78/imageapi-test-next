@@ -22,6 +22,7 @@ import { decode, RawImageData } from 'jpeg-js';
 import {
   convertImageDataToGrayscale,
   gaussianBlur,
+  gaussianMapImageData,
   getImageDataBuffer,
   invertImageData,
   locateSOSinImage,
@@ -121,6 +122,7 @@ const ImageEditor = () => {
   const [convertedImage, setConvertedImage] =
     useState<null | ReactElement<HTMLCanvasElement>>(null);
   const [conversionInProgress, setConversionInProgress] = useState(false);
+  const [gaussianMapImage, setGaussianMapImage] = useState<null | ReactElement<HTMLCanvasElement>>(null);
 
   useEffect(() => {
     setDataIsLoading(true);
@@ -135,6 +137,20 @@ const ImageEditor = () => {
       }
     );
   }, [params.image]);
+
+  useEffect(() => {
+    const gaussianMapData = gaussianMapImageData(editedSize.width, editedSize.height)
+    const newCanvasImage = (
+      <CanvasImage
+        imagedata={
+          new ImageData(gaussianMapData, editedSize.width, editedSize.height)
+        }
+        width={editedSize.width}
+        height={editedSize.height}
+      />
+    );
+    setGaussianMapImage(newCanvasImage);
+  }, [editedSize])
 
   const Thumbnail = (imageData: PicsumImage) => {
     const thumbnailURL = (url: string) =>
@@ -216,8 +232,8 @@ const ImageEditor = () => {
 
     const SOSIndex = locateSOSinImage(imageDataBuffer);
     const EOS = imageDataBuffer.length - 2;
-    console.log("SOSIndex", SOSIndex)
-    console.log("SOS markers", imageDataBuffer[SOSIndex - 2], imageDataBuffer[SOSIndex - 1])
+    // console.log("SOSIndex", SOSIndex)
+    // console.log("SOS markers", imageDataBuffer[SOSIndex - 2], imageDataBuffer[SOSIndex - 1])
     /* This is going to log A LOT! You probably don't
      want to do it unless your image is tiny!*/
     for (let index = SOSIndex; index < EOS; index = index + 4) {
@@ -438,7 +454,7 @@ const ImageEditor = () => {
                 data-processing-fn={'gaussianBlur'}
                 onClick={(e) => onJSConvertClick(e)}
               >
-                -&gt; blur
+                Gaussian blur (1px)
               </button>
               <br />
               {convertWithJS && convertedImage ? (
@@ -446,6 +462,11 @@ const ImageEditor = () => {
               ) : (
                 <div>{conversionInProgress && <LoadingSpinner />}</div>
               )}
+            </div>
+              <div className={styles.experimental}>
+                {gaussianMapImage && (
+                  <div className={styles.gaussianMap}>{gaussianMapImage}</div>
+                )}
             </div>
           </div>
         )}
