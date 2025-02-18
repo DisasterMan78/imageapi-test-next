@@ -20,11 +20,11 @@ import Link from 'next/link';
 import FetchImageOnClient from '@/app/fetch-image';
 import { decode, RawImageData } from 'jpeg-js';
 import {
-  convertToGrayscale,
+  convertImageDataToGrayscale,
+  gaussianBlur,
   getImageDataBuffer,
-  invertPixelColour,
-  locateSOSinJPEG,
-  rgbaArray,
+  invertImageData,
+  locateSOSinImage,
 } from '@/app/utils/image-processing';
 
 type APIError = false | string;
@@ -214,7 +214,7 @@ const ImageEditor = () => {
 
 
 
-    const SOSIndex = locateSOSinJPEG(imageDataBuffer);
+    const SOSIndex = locateSOSinImage(imageDataBuffer);
     const EOS = imageDataBuffer.length - 2;
     console.log("SOSIndex", SOSIndex)
     console.log("SOS markers", imageDataBuffer[SOSIndex - 2], imageDataBuffer[SOSIndex - 1])
@@ -236,7 +236,6 @@ const ImageEditor = () => {
     but it has been highly educational. And irrelevant. But educational.
     */
     const rawImageData = decode(imageDataBuffer) as RawImageData<Buffer>;
-    const pixelData = rawImageData.data;
 
     /*
     I started attempting to write PNG data from scratch. It is quite
@@ -252,44 +251,31 @@ const ImageEditor = () => {
     // const PNGBuffer = new ArrayBuffer(4 * rawImageData.width * rawImageData.height);
     // const PNGUint8CData = new Uint8ClampedArray(PNGBuffer)
 
-    const buffer = new ArrayBuffer(
+    let processedData: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(new ArrayBuffer(
       4 * rawImageData.width * rawImageData.height
-    );
-    const newUint8CData = new Uint8ClampedArray(buffer);
+    ));
 
-    for (let index = 0; index < pixelData.length; index = index + 4) {
-      const RBGA = [
-        pixelData[index],
-        pixelData[index + 1],
-        pixelData[index + 2],
-        pixelData[index + 3],
-      ];
+    switch (functionName) {
+      case 'convertToGrayscale':
+        processedData = convertImageDataToGrayscale(rawImageData);
+        break;
 
-      let processingFunction = (rgba: rgbaArray) => { return rgba as number[] };
-      switch (functionName) {
-        case 'convertToGrayscale':
-          processingFunction = convertToGrayscale;
-          break;
+      case 'invertPixelColour':
+        processedData = invertImageData(rawImageData);
+        break;
 
-        case 'invertPixelColour':
-          processingFunction = invertPixelColour;
-          break;
+      case 'gaussianBlur':
+        processedData = gaussianBlur(rawImageData)
+        break;
 
-        default:
-          break;
-      }
-      const grayscale = processingFunction(RBGA as rgbaArray);
-
-      newUint8CData[index] = grayscale[0];
-      newUint8CData[index + 1] = grayscale[1];
-      newUint8CData[index + 2] = grayscale[2];
-      newUint8CData[index + 3] = grayscale[3];
+      default:
+        throw new Error("Processing function not set")
     }
 
     const newCanvasImage = (
       <CanvasImage
         imagedata={
-          new ImageData(newUint8CData, rawImageData.width, rawImageData.height)
+          new ImageData(processedData, rawImageData.width, rawImageData.height)
         }
         width={rawImageData.width}
         height={rawImageData.height}
@@ -441,6 +427,18 @@ const ImageEditor = () => {
                 onClick={(e) => onJSConvertClick(e)}
               >
                 -&gt; grayscale
+              </button>
+              <button
+                data-image-url={getDownloadURL(
+                  image?.download_url as string,
+                  editedSize,
+                  grayscale,
+                  blur
+                    )}
+                data-processing-fn={'gaussianBlur'}
+                onClick={(e) => onJSConvertClick(e)}
+              >
+                -&gt; blur
               </button>
               <br />
               {convertWithJS && convertedImage ? (

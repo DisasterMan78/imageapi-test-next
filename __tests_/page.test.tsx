@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event'
 import mockRouter from 'next-router-mock';
 
 import Home from '../src/app/page'
-import testData from './image-test-data';
+import testData from './mocks/image-test-data.mock';
 
 const testApiURL = 'https://picsum.photos/v2/list';
 

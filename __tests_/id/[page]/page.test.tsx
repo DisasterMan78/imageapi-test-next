@@ -4,7 +4,7 @@ import '@testing-library/jest-dom'
 import { render, screen, within } from '@testing-library/react'
 
 import ImageEditor, { editorDefaults, LocalStorageImages } from '@/app/id/[image]/page'
-import testData from '../../image-test-data'
+import testData from '../../mocks/image-test-data.mock'
 import userEvent from '@testing-library/user-event'
 
 const testApiURL = 'https://picsum.photos/id/0/info'
