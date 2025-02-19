@@ -81,43 +81,31 @@ describe('api fetch tests', () => {
     const pixelMatrix = imageDataToPixelMatrix(rawImageData)
 
     expect(pixelMatrix).toEqual([
-      [
-        [254,   0,   0, 255],
-        [255, 128,   0, 255],
-        [255, 254,   0, 255],
-      ],
-      [
-        [128,   0, 255, 255],
-        [254,   0,   0, 255],
-        [255, 126,   0, 255],
-      ],
-      [
-        [  0,   0, 254, 255],
-        [128,   0, 255, 255],
-        [254,   0,   0, 255],
-      ]
+      [[254,   0,   0, 255], [255, 128,   0, 255], [255, 254,   0, 255]],
+      [[128,   0, 255, 255], [254,   0,   0, 255], [255, 126,   0, 255]],
+      [[  0,   0, 254, 255], [128,   0, 255, 255], [254,   0,   0, 255]],
     ])
   })
 
   it('can calculate the average value of each colour channel from the 8 pixels around a given pixel in some image data', async () => {
     const pixelMatrix = imageDataToPixelMatrix(rawImageData);
+    console.log("🚀 ~ it ~ pixelMatrix:", pixelMatrix)
 
-    const averageNeighbourRed = averageNeighbourByChannel(pixelMatrix, 1, 1, 0)
-    const averageNeighbourGreen = averageNeighbourByChannel(pixelMatrix, 1, 1, 1)
-    const averageNeighbourBlue = averageNeighbourByChannel(pixelMatrix, 1, 1, 2)
-
-    expect(averageNeighbourRed).toEqual(241)
-    expect(averageNeighbourGreen).toEqual(99)
-    expect(averageNeighbourBlue).toEqual(28)
+    const averageNeighbourRed = averageNeighbourByChannel(pixelMatrix, 3, 3, 0)
+    const averageNeighbourGreen = averageNeighbourByChannel(pixelMatrix, 3, 3, 1)
+    const averageNeighbourBlue = averageNeighbourByChannel(pixelMatrix, 3, 3, 2)
+    expect(averageNeighbourRed).toEqual(198)
+    expect(averageNeighbourGreen).toEqual(56)
+    expect(averageNeighbourBlue).toEqual(85)
   })
 
   it('can perform a basic blur on an image', () => {
     const blurredImageData = basicBlur(rawImageData)
-    console.log("🚀 ~ it ~ blurredImageData:", blurredImageData)
+    // console.log("🚀 ~ it ~ blurredImageData:", blurredImageData)
 
     expect(blurredImageData).toEqual(new Uint8ClampedArray([
       254,   0,   0, 255, 255, 128,   0, 255, 255, 254, 0, 255,
-      128,   0, 255, 255, 241,  99,  28, 255, 255, 126, 0, 255,
+      128,   0, 255, 255, 198,  56,  85, 255, 255, 126, 0, 255,
         0,   0, 254, 255, 128,   0, 255, 255, 254,  0,  0, 255
     ]))
   })

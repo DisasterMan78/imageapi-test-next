@@ -28,16 +28,16 @@ export const gaussianMapData = (width: number, height: number) => {
   const data: number[][] = [];
   const getGaussianMatrixValue = makeGaussian(255, width / 2, height / 2,  width / 5, height / 5);
 
-  for (let hIndex = 0; hIndex < height; hIndex++) {
-    data[hIndex] = [];
-    for (let wIndex = 0; wIndex < width; wIndex++) {
+  for (let yIndex = 0; yIndex < height; yIndex++) {
+    data[yIndex] = [];
+    for (let xIndex = 0; xIndex < width; xIndex++) {
       // Adding 0.5 to the coordinates gives us the middle of the
       // pixel, ensuring our matrix values are evenly spread around
       // the center point of the matrix
       // See test data for 'can generate gaussian image map data'
       // in __tests_/utils/make-gaussian-matrix.test.ts for an example
-      const gValue = getGaussianMatrixValue(wIndex + 0.5, hIndex + 0.5)
-      data[hIndex][wIndex] = gValue;
+      const gValue = getGaussianMatrixValue(xIndex + 0.5, yIndex + 0.5)
+      data[yIndex][xIndex] = gValue;
     }
   }
 
@@ -45,9 +45,3 @@ export const gaussianMapData = (width: number, height: number) => {
 }
 
 export default makeGaussian;
-
-// // USAGE
-// var gaussian = makeGaussian(300, 200, 200, 50, 50);
-
-// console.log(gaussian(100,100)); // ~5
-// console.log(gaussian(200, 200)); // 300

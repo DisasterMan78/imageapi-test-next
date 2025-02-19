@@ -22,7 +22,6 @@ import { decode, RawImageData } from 'jpeg-js';
 import {
   convertImageDataToGrayscale,
   basicBlur,
-  gaussianBlur,
   gaussianMapImageData,
   getImageDataBuffer,
   invertImageData,
@@ -139,20 +138,6 @@ const ImageEditor = () => {
     );
   }, [params.image]);
 
-  useEffect(() => {
-    const gaussianMapData = gaussianMapImageData(editedSize.width, editedSize.height)
-    const newCanvasImage = (
-      <CanvasImage
-        imagedata={
-          new ImageData(gaussianMapData, editedSize.width, editedSize.height)
-        }
-        width={editedSize.width}
-        height={editedSize.height}
-      />
-    );
-    setGaussianMapImage(newCanvasImage);
-  }, [editedSize])
-
   const Thumbnail = (imageData: PicsumImage) => {
     const thumbnailURL = (url: string) =>
       url.replace(
@@ -221,29 +206,27 @@ const ImageEditor = () => {
     setConvertWithJS(true);
     setConversionInProgress(true);
     setConvertedImage(null);
-    const url = e.currentTarget.getAttribute('data-image-url') as string;
-    const functionName = e.currentTarget.getAttribute('data-processing-fn');
+    const clickedButton = e.currentTarget;
+    const url = clickedButton.getAttribute('data-image-url') as string;
+    const functionName = clickedButton.getAttribute('data-processing-fn');
     const imageData = (await FetchImageOnClient(url)) as Blob;
     const imageDataBuffer = (await getImageDataBuffer(
       imageData
     )) as Uint8Array<ArrayBuffer>;
 
-
-
-
-    const SOSIndex = locateSOSinImage(imageDataBuffer);
-    const EOS = imageDataBuffer.length - 2;
+    // const SOSIndex = locateSOSinImage(imageDataBuffer);
+    // const EOS = imageDataBuffer.length - 2;
     // console.log("SOSIndex", SOSIndex)
     // console.log("SOS markers", imageDataBuffer[SOSIndex - 2], imageDataBuffer[SOSIndex - 1])
     /* This is going to log A LOT! You probably don't
      want to do it unless your image is tiny!*/
-    for (let index = SOSIndex; index < EOS; index = index + 4) {
-      const R = imageDataBuffer[index];
-      const G = imageDataBuffer[index + 1];
-      const B = imageDataBuffer[index + 2];
-      const A = imageDataBuffer[index + 3]
-      console.log(`RGBA ${index / 4}:`, R, G, B, A)
-    }
+    // for (let index = SOSIndex; index < EOS; index = index + 4) {
+    //   const R = imageDataBuffer[index];
+    //   const G = imageDataBuffer[index + 1];
+    //   const B = imageDataBuffer[index + 2];
+    //   const A = imageDataBuffer[index + 3]
+    //   console.log(`RGBA ${index / 4}:`, R, G, B, A)
+    // }
 
     /* So I got to this point in the process then gave myself a good slap.
     JPEG data is, of course, compressed, and does NOT resemble RGBA values.
@@ -282,11 +265,13 @@ const ImageEditor = () => {
         break;
 
       case 'basicBlur':
-        processedData = basicBlur(rawImageData)
+        const blurLevel = clickedButton.getAttribute('data-blur-radius') as string;
+        console.log('basicBlur level:', blurLevel)
+        processedData = basicBlur(rawImageData, parseInt(blurLevel));
         break;
 
       default:
-        throw new Error("Processing function not set")
+        throw new Error("Processing function not set");
     }
 
     const newCanvasImage = (
@@ -451,11 +436,25 @@ const ImageEditor = () => {
                   editedSize,
                   grayscale,
                   blur
-                    )}
+                )}
                 data-processing-fn={'basicBlur'}
+                data-blur-radius={1}
                 onClick={(e) => onJSConvertClick(e)}
               >
-                Gaussian blur (1px)
+                Blur (1px)
+              </button>
+              <button
+                data-image-url={getDownloadURL(
+                  image?.download_url as string,
+                  editedSize,
+                  grayscale,
+                  blur
+                )}
+                data-processing-fn={'basicBlur'}
+                data-blur-radius={5}
+                onClick={(e) => onJSConvertClick(e)}
+              >
+                Blur (2px)
               </button>
               <br />
               {convertWithJS && convertedImage ? (
@@ -463,11 +462,6 @@ const ImageEditor = () => {
               ) : (
                 <div>{conversionInProgress && <LoadingSpinner />}</div>
               )}
-            </div>
-              <div className={styles.experimental}>
-                {gaussianMapImage && (
-                  <div className={styles.gaussianMap}>{gaussianMapImage}</div>
-                )}
             </div>
           </div>
         )}

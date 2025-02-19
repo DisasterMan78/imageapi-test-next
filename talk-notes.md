@@ -15,4 +15,7 @@ https://en.wikipedia.org/wiki/JPEG_File_Interchange_Format
 
 https://en.wikipedia.org/wiki/Gaussian_blur
 
-https://www.pixelstech.net/article/1353768112-gaussian-blur-algorithm
+https://www.pixelstech.net/article/1353768112-gaussian-blur-algorithm"
+
+"It's like a layer / mask of gaussian data that you're putting on top of your base image, like a sort of blur-paint-by-numbers?"
+@mapgie.co.uk on Bluesky
