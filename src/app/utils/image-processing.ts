@@ -202,23 +202,19 @@ export const gaussianBlur = (imageData: RawImageData<Buffer>) => {
 }
 
 export const gaussianMapImageData = (width: number, height: number) => {
-  const buffer = new ArrayBuffer(
-    4 * width * height
-  );
+  // One element per channel, RGBA
+  const buffer = new ArrayBuffer(4 * width * height);
   const newUint8CData = new Uint8ClampedArray(buffer);
-
   const gaussianData = gaussianMapData(width, height);
-  // console.log("🚀 ~ gaussianMap ~ gaussianData:", gaussianData)
 
   for (let hIndex = 0; hIndex < height; hIndex++) {
     for (let wIndex = 0; wIndex < width; wIndex++) {
       const arrayOffset = (hIndex * (width * 4))  + (wIndex * 4);
-      // const gValue = getGaussianMatrixValue(wIndex, hIndex)
       const gValue = gaussianData[hIndex][wIndex]
-      newUint8CData[arrayOffset + 0] = gValue;
-      newUint8CData[arrayOffset + 1] = gValue;
-      newUint8CData[arrayOffset + 2] = gValue;
-      newUint8CData[arrayOffset + 3] = 255;
+      newUint8CData[arrayOffset + 0] = gValue; //R
+      newUint8CData[arrayOffset + 1] = gValue; //G
+      newUint8CData[arrayOffset + 2] = gValue; //B
+      newUint8CData[arrayOffset + 3] = 255;    //A
     }
   }
   return newUint8CData;

@@ -1,3 +1,5 @@
+type MakeGaussian = (amplitude : number, x0: number, y0: number, sigmaX: number, sigmaY: number) => (x: number, y: number) => number
+
 /**@author https://gist.github.com/uhho
  * @gist https://gist.github.com/uhho/dddd61edc0fdfa1c28e6
  * Two-dimensional Gaussian function
@@ -12,22 +14,6 @@
  * @param {number} v
  * @returns {number}
  */
-
-type MakeGaussianParams = {
-  amplitude: number;
-  x0: number;
-  y0: number;
-  sigmaX: number;
-  sigmaY: number
-}
-
-type ReturnFnParams = MakeGaussianParams & {
-  x: number,
-  y: number,
-}
-
-type MakeGaussian = (amplitude : number, x0: number, y0: number, sigmaX: number, sigmaY: number) => (x: number, y: number) => number
-
 const  makeGaussian: MakeGaussian = (amplitude, x0, y0, sigmaX, sigmaY) => {
   return function(amplitude : number, x0: number, y0: number, sigmaX: number, sigmaY: number, x: number, y: number):number {
       const exponent = -(
@@ -45,7 +31,12 @@ export const gaussianMapData = (width: number, height: number) => {
   for (let hIndex = 0; hIndex < height; hIndex++) {
     data[hIndex] = [];
     for (let wIndex = 0; wIndex < width; wIndex++) {
-      const gValue = getGaussianMatrixValue(wIndex, hIndex)
+      // Adding 0.5 to the coordinates gives us the middle of the
+      // pixel, ensuring our matrix values are evenly spread around
+      // the center point of the matrix
+      // See test data for 'can generate gaussian image map data'
+      // in __tests_/utils/make-gaussian-matrix.test.ts for an example
+      const gValue = getGaussianMatrixValue(wIndex + 0.5, hIndex + 0.5)
       data[hIndex][wIndex] = gValue;
     }
   }
