@@ -87,20 +87,22 @@ describe('api fetch tests', () => {
     const rawImageData = decode(imageDataArray) as RawImageData<Buffer>
     const pixelMatrix = imageDataToPixelMatrix(rawImageData)
 
-    // console.dir(pixelMatrix, {'maxArrayLength': null})
-  })
-
-  it('can make a 2d gaussian matrix', async () => {
-    const imageData = await FetchImageOnClient(testAPIURL) as Blob
-    const imageDataArray = await getImageDataBuffer(imageData)
-    const rawImageData = decode(imageDataArray) as RawImageData<Buffer>
-    const pixelMatrix = gaussianBlur(rawImageData)
-    // const gaussian = makeGaussianMatrix(100, 200, 200)
-
-    // console.log(gaussian(100, 100)); // ~5
-    // console.log(gaussian(200, 200)); // 300
-
-
-    // console.dir(pixelMatrix, {'maxArrayLength': null})
+    expect(pixelMatrix).toEqual([
+      [
+        [254,   0,   0, 255],
+        [255, 128,   0, 255],
+        [255, 254,   0, 255],
+      ],
+      [
+        [128,   0, 255, 255],
+        [254,   0,   0, 255],
+        [255, 126,   0, 255],
+      ],
+      [
+        [  0,   0, 254, 255],
+        [128,   0, 255, 255],
+        [254,   0,   0, 255],
+      ]
+    ])
   })
 })
