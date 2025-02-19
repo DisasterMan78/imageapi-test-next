@@ -1,34 +1,36 @@
 import '@testing-library/jest-dom'
+import { waitFor } from '@testing-library/dom'
+import { decode, RawImageData } from 'jpeg-js'
 
 import FetchImageOnClient from '@/app/fetch-image'
-import { waitFor } from '@testing-library/dom'
-import { checkImageDataIsJPEG, convertImageDataToGrayscale, convertToGrayscale, gaussianBlur, getImageDataBuffer, imageDataToPixelMatrix, invertImageData, invertPixelColour, locateSOSinImage, RGBAArray } from '@/app/utils/image-processing'
-import { pngAPIURL, testAPIURL, testJPGResponse, testSmallJPGURL, testTinyJPGURL } from '../mocks/msw.mock'
-import { decode, RawImageData } from 'jpeg-js'
-import invertedSpectrumImageData from '../mocks/inverted-spectrum-image-data.mock'
-import grayscaleSpectrumImageData from '../mocks/grayscale-spectrum-image-data.mock'
-// import makeGaussianMatrix from '@/app/utils/make-gaussian-matrix'
+import { averageNeighbourByChannel, checkImageDataIsJPEG, convertImageDataToGrayscale, convertToGrayscale,  getImageDataBuffer, imageDataToPixelMatrix, invertImageData, invertPixelColour, locateSOSinImage, RGBAArray } from '@/app/utils/image-processing'
+import { pngAPIURL, testTinyJPGURL } from '../mocks/msw.mock'
+
+let testImageData: Blob,
+  testImageDataArray: Uint8Array<ArrayBuffer>,
+  rawImageData: RawImageData<Buffer>
+
+beforeEach(async () => {
+  testImageData = await FetchImageOnClient(testTinyJPGURL) as Blob
+  testImageDataArray = await getImageDataBuffer(testImageData)
+  rawImageData = decode(testImageDataArray)
+})
+
 
 describe('api fetch tests', () => {
   it ('can get the image data buffer as a Uint8Array', async () => {
-    const imageData = await FetchImageOnClient(testAPIURL) as Blob
-    const imageDataArray = await getImageDataBuffer(imageData)
-
-    expect(imageDataArray instanceof Uint8Array).toBeTruthy()
+    expect(testImageDataArray instanceof Uint8Array).toBeTruthy()
   })
 
   it('can check that binary data has JPEG signature markers (true)', async () => {
-    const imageData = await FetchImageOnClient(testAPIURL) as Blob
-    const imageDataArray = await getImageDataBuffer(imageData)
-
     await waitFor(() => {
-      expect(checkImageDataIsJPEG(imageDataArray)).toBeTruthy()
+      expect(checkImageDataIsJPEG(testImageDataArray)).toBeTruthy()
     })
   })
 
   it('can check that binary data has JPEG signature markers (false)', async () => {
-    const imageData = await FetchImageOnClient(pngAPIURL) as Blob
-    const imageDataArray = await getImageDataBuffer(imageData)
+    const pngImageData = await FetchImageOnClient(pngAPIURL) as Blob
+    const imageDataArray = await getImageDataBuffer(pngImageData)
 
     await waitFor(() => {
       expect(checkImageDataIsJPEG(imageDataArray)).toBeFalsy()
@@ -36,11 +38,9 @@ describe('api fetch tests', () => {
   })
 
   it('can find Start of Scan signature in image data', async () => {
-    const imageData = await FetchImageOnClient(testAPIURL) as Blob
-    const imageDataArray = await getImageDataBuffer(imageData)
-    const sosPosition = locateSOSinImage(imageDataArray);
+    const sosPosition = locateSOSinImage(testImageDataArray);
 
-    expect(sosPosition).toEqual(49412)
+    expect(sosPosition).toEqual(3704)
   })
 
   it('can convert an RGBA colour to grayscale', () => {
@@ -51,14 +51,9 @@ describe('api fetch tests', () => {
   })
 
   it('can convert an RGB image to grayscale', async () => {
-    const imageData = await FetchImageOnClient(testSmallJPGURL) as Blob
-    const imageDataArray = await getImageDataBuffer(imageData)
-    const rawImageData = decode(imageDataArray) as RawImageData<Buffer>
     const convertedPixelData = convertImageDataToGrayscale(rawImageData);
 
     expect(convertedPixelData).toEqual(grayscaleSpectrumImageData)
-
-
   })
 
   it('can invert an RGBA colour', () => {
@@ -69,22 +64,12 @@ describe('api fetch tests', () => {
   })
 
   it('can invert an RGB image', async () => {
-    const imageData = await FetchImageOnClient(testSmallJPGURL) as Blob
-    const imageDataArray = await getImageDataBuffer(imageData)
-    const rawImageData = decode(imageDataArray) as RawImageData<Buffer>
     const convertedPixelData = invertImageData(rawImageData);
 
-    // console.dir(convertedPixelData, { 'maxArrayLength': null})
-
     expect(convertedPixelData).toEqual(invertedSpectrumImageData)
-
-
   })
 
   it('can convert image data to a 2 dimensional array of pixel data arrays', async () => {
-    const imageData = await FetchImageOnClient(testTinyJPGURL) as Blob
-    const imageDataArray = await getImageDataBuffer(imageData)
-    const rawImageData = decode(imageDataArray) as RawImageData<Buffer>
     const pixelMatrix = imageDataToPixelMatrix(rawImageData)
 
     expect(pixelMatrix).toEqual([
@@ -104,5 +89,17 @@ describe('api fetch tests', () => {
         [254,   0,   0, 255],
       ]
     ])
+  })
+
+  it('can calculate the average value of each colour channel from the 8 pixels around a given pixel in some image data', async () => {
+    const pixelMatrix = imageDataToPixelMatrix(rawImageData);
+
+    const averageNeighbourRed = averageNeighbourByChannel(pixelMatrix, 1, 1, 0)
+    const averageNeighbourGreen = averageNeighbourByChannel(pixelMatrix, 1, 1, 1)
+    const averageNeighbourBlue = averageNeighbourByChannel(pixelMatrix, 1, 1, 2)
+
+    expect(averageNeighbourRed).toEqual(241)
+    expect(averageNeighbourGreen).toEqual(99)
+    expect(averageNeighbourBlue).toEqual(28)
   })
 })
