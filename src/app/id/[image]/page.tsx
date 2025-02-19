@@ -21,6 +21,7 @@ import FetchImageOnClient from '@/app/fetch-image';
 import { decode, RawImageData } from 'jpeg-js';
 import {
   convertImageDataToGrayscale,
+  basicBlur,
   gaussianBlur,
   gaussianMapImageData,
   getImageDataBuffer,
@@ -280,8 +281,8 @@ const ImageEditor = () => {
         processedData = invertImageData(rawImageData);
         break;
 
-      case 'gaussianBlur':
-        processedData = gaussianBlur(rawImageData)
+      case 'basicBlur':
+        processedData = basicBlur(rawImageData)
         break;
 
       default:
@@ -451,7 +452,7 @@ const ImageEditor = () => {
                   grayscale,
                   blur
                     )}
-                data-processing-fn={'gaussianBlur'}
+                data-processing-fn={'basicBlur'}
                 onClick={(e) => onJSConvertClick(e)}
               >
                 Gaussian blur (1px)

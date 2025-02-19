@@ -144,7 +144,7 @@ export const imageDataToPixelMatrix = (imageData: RawImageData<Buffer>) => {
   return matrix;
 }
 
-const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, hIndex: number, wIndex: number, channelIndex: number) => {
+export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, hIndex: number, wIndex: number, channelIndex: number) => {
   let value = 0;
   value += pixelMatrix[hIndex - 1][wIndex - 1][channelIndex];
   value += pixelMatrix[hIndex - 1][wIndex + 0][channelIndex];
@@ -155,7 +155,44 @@ const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, hIndex: number, wIn
   value += pixelMatrix[hIndex - 1][wIndex - 1][channelIndex];
   value += pixelMatrix[hIndex - 1][wIndex + 0][channelIndex];
   value += pixelMatrix[hIndex - 1][wIndex + 1][channelIndex];
-  return value / 9;
+  return Math.round(value / 9);
+}
+
+export const basicBlur = (imageData: RawImageData<Buffer>) => {
+  const { width, height } = imageData;
+  const pixelMatrix = imageDataToPixelMatrix(imageData);
+  const buffer = new ArrayBuffer(
+    4 * width * height
+  );
+  const newUint8CData = new Uint8ClampedArray(buffer);
+
+  for (let hIndex = 0; hIndex < height; hIndex++) {
+    for (let wIndex = 0; wIndex < width; wIndex++) {
+      const arrayOffset = (hIndex * (width * 4))  + (wIndex * 4);
+      // First attempt, ignore first and last rows as they are more complex
+      if (hIndex !== 0 && hIndex !== height - 1) {
+        // And ignore first and last column
+        if (wIndex !== 0 && wIndex !== width - 1) {
+          newUint8CData[arrayOffset + 0] = averageNeighbourByChannel(pixelMatrix, hIndex, wIndex, 0);
+          newUint8CData[arrayOffset + 1] = averageNeighbourByChannel(pixelMatrix, hIndex, wIndex, 1);
+          newUint8CData[arrayOffset + 2] = newUint8CData[arrayOffset + 3] = averageNeighbourByChannel(pixelMatrix, hIndex, wIndex, 2);
+          newUint8CData[arrayOffset + 3] = 255;
+        } else {
+          newUint8CData[arrayOffset + 0] = pixelMatrix[hIndex][wIndex][0];
+          newUint8CData[arrayOffset + 1] = pixelMatrix[hIndex][wIndex][1];
+          newUint8CData[arrayOffset + 2] = pixelMatrix[hIndex][wIndex][2];
+          newUint8CData[arrayOffset + 3] = pixelMatrix[hIndex][wIndex][3];
+        }
+      } else {
+        newUint8CData[arrayOffset + 0] = pixelMatrix[hIndex][wIndex][0];
+        newUint8CData[arrayOffset + 1] = pixelMatrix[hIndex][wIndex][1];
+        newUint8CData[arrayOffset + 2] = pixelMatrix[hIndex][wIndex][2];
+        newUint8CData[arrayOffset + 3] = pixelMatrix[hIndex][wIndex][3];
+      }
+    }
+  }
+  ;
+  return newUint8CData;
 }
 
 export const gaussianBlur = (imageData: RawImageData<Buffer>) => {
@@ -166,7 +203,7 @@ export const gaussianBlur = (imageData: RawImageData<Buffer>) => {
   );
   const newUint8CData = new Uint8ClampedArray(buffer);
 
-  const gaussianMatrix = gaussianMapData(width, height);
+  const gaussianMatrix = gaussianMapImageData(width, height);
   console.log(width, height)
   console.log(Math.round(gaussianMatrix[0][0]))
   console.log(Math.round(gaussianMatrix[Math.round(width / 2)][Math.round(height / 2)]))

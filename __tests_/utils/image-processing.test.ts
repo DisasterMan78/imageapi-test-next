@@ -3,7 +3,7 @@ import { waitFor } from '@testing-library/dom'
 import { decode, RawImageData } from 'jpeg-js'
 
 import FetchImageOnClient from '@/app/fetch-image'
-import { averageNeighbourByChannel, checkImageDataIsJPEG, convertImageDataToGrayscale, convertToGrayscale,  getImageDataBuffer, imageDataToPixelMatrix, invertImageData, invertPixelColour, locateSOSinImage, RGBAArray } from '@/app/utils/image-processing'
+import { averageNeighbourByChannel, basicBlur, checkImageDataIsJPEG, convertImageDataToGrayscale, convertToGrayscale,  getImageDataBuffer, imageDataToPixelMatrix, invertImageData, invertPixelColour, locateSOSinImage, RGBAArray } from '@/app/utils/image-processing'
 import { pngAPIURL, testTinyJPGURL } from '../mocks/msw.mock'
 
 let testImageData: Blob,
@@ -53,7 +53,11 @@ describe('api fetch tests', () => {
   it('can convert an RGB image to grayscale', async () => {
     const convertedPixelData = convertImageDataToGrayscale(rawImageData);
 
-    expect(convertedPixelData).toEqual(grayscaleSpectrumImageData)
+    expect(convertedPixelData).toEqual(new Uint8ClampedArray([
+       76,  76,  76, 255, 151, 151, 151, 255, 225, 225, 225, 255,
+       67,  67,  67, 255,  76,  76,  76, 255, 150, 150, 150, 255,
+       29,  29,  29, 255,  67,  67,  67, 255,  76,  76,  76, 255,
+    ]))
   })
 
   it('can invert an RGBA colour', () => {
@@ -66,7 +70,11 @@ describe('api fetch tests', () => {
   it('can invert an RGB image', async () => {
     const convertedPixelData = invertImageData(rawImageData);
 
-    expect(convertedPixelData).toEqual(invertedSpectrumImageData)
+    expect(convertedPixelData).toEqual(new Uint8ClampedArray([
+        1, 255, 255, 255,   0, 127, 255, 255,  0,   1, 255, 255,
+      127, 255,   0, 255,   1, 255, 255, 255,  0, 129, 255, 255,
+      255, 255,   1, 255, 127, 255,   0, 255,  1, 255, 255, 255,
+    ]))
   })
 
   it('can convert image data to a 2 dimensional array of pixel data arrays', async () => {
@@ -101,5 +109,16 @@ describe('api fetch tests', () => {
     expect(averageNeighbourRed).toEqual(241)
     expect(averageNeighbourGreen).toEqual(99)
     expect(averageNeighbourBlue).toEqual(28)
+  })
+
+  it('can perform a basic blur on an image', () => {
+    const blurredImageData = basicBlur(rawImageData)
+    console.log("🚀 ~ it ~ blurredImageData:", blurredImageData)
+
+    expect(blurredImageData).toEqual(new Uint8ClampedArray([
+      254,   0,   0, 255, 255, 128,   0, 255, 255, 254, 0, 255,
+      128,   0, 255, 255, 241,  99,  28, 255, 255, 126, 0, 255,
+        0,   0, 254, 255, 128,   0, 255, 255, 254,  0,  0, 255
+    ]))
   })
 })
