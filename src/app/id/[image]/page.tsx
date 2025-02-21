@@ -22,7 +22,6 @@ import { decode, RawImageData } from 'jpeg-js';
 import {
   convertImageDataToGrayscale,
   basicBlur,
-  gaussianMapImageData,
   getImageDataBuffer,
   invertImageData,
   locateSOSinImage,
@@ -58,12 +57,6 @@ export const editorDefaults = {
   blur: 0,
 };
 
-type CanvasProps = {
-  imagedata: ImageData;
-  width: number;
-  height: number;
-};
-
 const getDownloadURL = (
   url: string,
   editedSize: EditedSize,
@@ -76,22 +69,6 @@ const getDownloadURL = (
       blur > 0 ? `&blur=${blur}` : ''
     }`
   );
-
-const CanvasImage = (props: CanvasProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    if (canvasRef.current) {
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
-
-      canvas.width = props.width;
-      canvas.height = props.height;
-      context?.putImageData(props.imagedata, 0, 0);
-    }
-  });
-  return <canvas ref={canvasRef} {...props} />;
-};
 
 const ImageEditor = () => {
   const params = useParams();
@@ -122,7 +99,6 @@ const ImageEditor = () => {
   const [convertedImage, setConvertedImage] =
     useState<null | ReactElement<HTMLCanvasElement>>(null);
   const [conversionInProgress, setConversionInProgress] = useState(false);
-  const [gaussianMapImage, setGaussianMapImage] = useState<null | ReactElement<HTMLCanvasElement>>(null);
 
   useEffect(() => {
     setDataIsLoading(true);
@@ -276,7 +252,7 @@ const ImageEditor = () => {
 
     const newCanvasImage = (
       <CanvasImage
-        imagedata={
+        imageData={
           new ImageData(processedData, rawImageData.width, rawImageData.height)
         }
         width={rawImageData.width}
@@ -451,7 +427,7 @@ const ImageEditor = () => {
                   blur
                 )}
                 data-processing-fn={'basicBlur'}
-                data-blur-radius={5}
+                data-blur-radius={10}
                 onClick={(e) => onJSConvertClick(e)}
               >
                 Blur (2px)

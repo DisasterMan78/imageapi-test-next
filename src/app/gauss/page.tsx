@@ -3,15 +3,14 @@ import {
   ChangeEvent,
   ReactElement,
   useEffect,
-  useRef,
   useState,
 } from 'react';
-import { useParams } from 'next/navigation';
 
 import homeStyles from '../page.module.css';
 import styles from '../id/[image]/page.module.css';
 
 import {
+  CanvasImage,
   gaussianMapImageData,
 } from '@/app/utils/image-processing';
 
@@ -31,44 +30,19 @@ export type LocalStorageImages = {
   [key: string]: string;
 };
 
-const thumbnailWidth = 300;
-const thumbnailHeight = 200;
-const imageSizeFactor = 2.5;
-const imageWidth = thumbnailWidth * imageSizeFactor;
-const imageHeight = thumbnailHeight * imageSizeFactor;
+const imageWidth = 300;
+const imageHeight = 300;
 
 export const editorDefaults = {
   width: imageWidth,
   height: imageHeight,
 };
 
-type CanvasProps = {
-  imagedata: ImageData;
-  width: number;
-  height: number;
-};
-
-const CanvasImage = (props: CanvasProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    if (canvasRef.current) {
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
-
-      canvas.width = props.width;
-      canvas.height = props.height;
-      context?.putImageData(props.imagedata, 0, 0);
-    }
-  });
-  return <canvas ref={canvasRef} {...props} />;
-};
-
-const ImageEditor = () => {
+const GaussianImageMap = () => {
   let itemStorage = null;
 
+  const storageId = 'gauss';
   if (typeof window !== 'undefined') {
-    const storageId = `gauss`;
 
     itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
 
@@ -88,7 +62,7 @@ const ImageEditor = () => {
     const gaussianMapData = gaussianMapImageData(editedSize.width, editedSize.height)
     const newCanvasImage = (
       <CanvasImage
-        imagedata={
+        imageData={
           new ImageData(gaussianMapData, editedSize.width, editedSize.height)
         }
         width={editedSize.width}
@@ -124,10 +98,10 @@ const ImageEditor = () => {
         break;
     }
     if (typeof window !== 'undefined') {
-      const itemStorage = JSON.parse(localStorage.getItem('gauss') as string);
+      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
 
       itemStorage[inputName as string] = value;
-      localStorage.setItem('gauss', JSON.stringify(itemStorage));
+      localStorage.setItem(storageId, JSON.stringify(itemStorage));
     }
   };
 
@@ -178,4 +152,4 @@ const ImageEditor = () => {
   );
 };
 
-export default ImageEditor;
+export default GaussianImageMap;

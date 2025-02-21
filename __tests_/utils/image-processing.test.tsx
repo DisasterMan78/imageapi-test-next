@@ -3,7 +3,7 @@ import { waitFor } from '@testing-library/dom'
 import { decode, RawImageData } from 'jpeg-js'
 
 import FetchImageOnClient from '@/app/fetch-image'
-import { averageNeighbourByChannel, basicBlur, checkImageDataIsJPEG, convertImageDataToGrayscale, convertToGrayscale,  getImageDataBuffer, imageDataToPixelMatrix, invertImageData, invertPixelColour, locateSOSinImage, RGBAArray } from '@/app/utils/image-processing'
+import { averageNeighbourByChannel, basicBlur, CanvasImage, checkImageDataIsJPEG, convertImageDataToGrayscale, convertToGrayscale,  getImageDataBuffer, imageDataToDecimalArry, imageDataToPixelMatrix, invertImageData, invertPixelColour, locateSOSinImage, RGBAArray } from '@/app/utils/image-processing'
 import { pngAPIURL, testTinyJPGURL } from '../mocks/msw.mock'
 
 let testImageData: Blob,
@@ -89,24 +89,35 @@ describe('api fetch tests', () => {
 
   it('can calculate the average value of each colour channel from the 8 pixels around a given pixel in some image data', async () => {
     const pixelMatrix = imageDataToPixelMatrix(rawImageData);
-    console.log("🚀 ~ it ~ pixelMatrix:", pixelMatrix)
+    const red = pixelMatrix[1][1][0];
+    const averageNeighbourRed = averageNeighbourByChannel(pixelMatrix, 1, 1, 0)
 
-    const averageNeighbourRed = averageNeighbourByChannel(pixelMatrix, 3, 3, 0)
-    const averageNeighbourGreen = averageNeighbourByChannel(pixelMatrix, 3, 3, 1)
-    const averageNeighbourBlue = averageNeighbourByChannel(pixelMatrix, 3, 3, 2)
+    const green = pixelMatrix[1][1][1];
+    const averageNeighbourGreen = averageNeighbourByChannel(pixelMatrix, 1, 1, 1)
+
+    const blue = pixelMatrix[1][1][2];
+    const averageNeighbourBlue = averageNeighbourByChannel(pixelMatrix, 1, 1, 2)
+
+    expect(averageNeighbourRed).not.toEqual(red)
     expect(averageNeighbourRed).toEqual(198)
+
+    expect(averageNeighbourGreen).not.toEqual(green)
     expect(averageNeighbourGreen).toEqual(56)
+
+    expect(averageNeighbourBlue).not.toEqual(blue)
     expect(averageNeighbourBlue).toEqual(85)
   })
 
   it('can perform a basic blur on an image', () => {
     const blurredImageData = basicBlur(rawImageData)
-    // console.log("🚀 ~ it ~ blurredImageData:", blurredImageData)
+    const dataInDecimal = imageDataToDecimalArry(rawImageData.data)
+
+    expect(blurredImageData).not.toEqual(dataInDecimal);
 
     expect(blurredImageData).toEqual(new Uint8ClampedArray([
-      254,   0,   0, 255, 255, 128,   0, 255, 255, 254, 0, 255,
-      128,   0, 255, 255, 198,  56,  85, 255, 255, 126, 0, 255,
-        0,   0, 254, 255, 128,   0, 255, 255, 254,  0,  0, 255
+      223,  32,  64, 255, 234,  85,  43, 255, 255, 127,   0, 255,
+      170,  21, 127, 255, 198,  56,  85, 255, 234,  85,  43, 255,
+      128,   0, 191, 255, 170,  21, 127, 255, 223,  32,  64, 255,
     ]))
   })
 })

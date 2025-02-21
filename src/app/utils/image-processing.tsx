@@ -1,5 +1,6 @@
 import { RawImageData } from "jpeg-js";
 import { gaussianMapData } from "./make-gaussian-matrix";
+import { useEffect, useRef } from "react";
 
 // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-5.html#tail-recursion-elimination-on-conditional-types
 type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N
@@ -144,57 +145,52 @@ export const imageDataToPixelMatrix = (imageData: RawImageData<Buffer>) => {
   return matrix;
 }
 
-const neighboursAtDistance = (pixelMatrix: PixelMatrix, yIndex: number, xIndex: number, channelIndex: number, distance = 1) => {
-  // console.log("🚀 ~ neighboursAtDistance ~ distance:", distance)
+export const imageDataToDecimalArry = (data: Buffer<ArrayBufferLike>) => {
+  // This seems a bit daft, but JS auto-typecasts the hex to decimal
+  // You'd think data.map(datum => parseInt(`${datum}`), 16)
+  // would work, but that returns the original buffer
+  const array: number[] = [];
+  data.forEach(datum => array.push(datum))
+  return array;
+}
+
+const neighboursAtDistance = (pixelMatrix: PixelMatrix, xIndex: number, yIndex: number, channelIndex: number, distance = 1) => {
   const size = (distance * 2) + 1;
   const initialX = xIndex - distance;
   const initialY = yIndex - distance;
+  const firstRow = pixelMatrix[initialY];
+  const lastRow = pixelMatrix[initialY + (distance * 2)];
   const values: number[] = [];
 
-  for (let column = 0; column < size; column++) { //Top and bottom rows
-    if (
-      pixelMatrix[initialY] &&
-      pixelMatrix[initialY][initialX + column]
-    ) {
-      values.push(pixelMatrix[initialY][initialX + column][channelIndex]);
+  for (let column = 0; column < size; column++) {
+    if (firstRow && firstRow[initialX + column]) {
+      values.push(firstRow[initialX + column][channelIndex]);
     }
 
-    if (
-      pixelMatrix[initialY + (distance * 2)] &&
-      pixelMatrix[initialY + (distance * 2)][initialX + column]
-    ) {
+    if (lastRow && lastRow[initialX + column]) {
       values.push(pixelMatrix[initialY + (distance * 2)][initialX + column][channelIndex]);
     }
   }
 
-  for (let row = 1; row < size - 1; row++) { // Edges
-    if (
-      pixelMatrix[initialY + row] &&
-      pixelMatrix[initialY + row][initialX]
-    ) {
-      values.push(pixelMatrix[initialY + row][initialX][channelIndex]);
+  for (let row = 1; row < size - 1; row++) {
+    const currentRow = pixelMatrix[initialY + row];
+    if (currentRow && currentRow[initialX]) {
+      values.push(currentRow[initialX][channelIndex]);
     }
-    if (
-      pixelMatrix[initialY + row] &&
-      pixelMatrix[initialY + row][initialX + (distance * 2)]
-    ) {
-      values.push(pixelMatrix[initialY + row][initialX + (distance * 2)][channelIndex]);
+    if (currentRow && currentRow[initialX + (distance * 2)]) {
+      values.push(currentRow[initialX + (distance * 2)][channelIndex]);
     }
   }
-
   return values;
 }
 
 export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: number, xIndex: number, channelIndex: number, distance = 1) => {
-  // console.log("🚀 ~ averageNeighbourByChannel ~ distance:", distance)
-  const neighbours: number[] = [];
+  let neighbours: number[] = [];
 
   for (let index = 1; index < distance + 1; index++) {
-    neighbours.concat(neighboursAtDistance(pixelMatrix, xIndex, yIndex, channelIndex, index))
+    neighbours = neighbours.concat(neighboursAtDistance(pixelMatrix, xIndex, yIndex, channelIndex, index))
   }
 
-  console.log("🚀 ~ averageNeighbourByChannel ~ pixelMatrix:", pixelMatrix)
-  console.log("🚀 ~ averageNeighbourByChannel ~ pixelMatrix[yIndex]w:", pixelMatrix[yIndex])
   neighbours.push(pixelMatrix[yIndex][xIndex][channelIndex]);
 
   const sum = neighbours.reduce((accumulator, value) => accumulator + value, 0);
@@ -203,7 +199,6 @@ export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: numb
 }
 
 export const basicBlur = (imageData: RawImageData<Buffer>, blurRadius = 1) => {
-  console.log('basic blurch!', blurRadius)
   const { width, height } = imageData;
   const pixelMatrix = imageDataToPixelMatrix(imageData);
   const buffer = new ArrayBuffer(
@@ -214,26 +209,11 @@ export const basicBlur = (imageData: RawImageData<Buffer>, blurRadius = 1) => {
   for (let yIndex = 0; yIndex < height; yIndex++) {
     for (let xIndex = 0; xIndex < width; xIndex++) {
       const arrayOffset = (yIndex * (width * 4))  + (xIndex * 4);
-      // // First attempt, ignore first and last rows as they are more complex
-      // if (yIndex !== 0 && yIndex !== height - 1) {
-      //   // And ignore first and last column
-      //   if (xIndex !== 0 && xIndex !== width - 1) {
-          newUint8CData[arrayOffset + 0] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 0, blurRadius);
-          newUint8CData[arrayOffset + 1] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 1, blurRadius);
-          newUint8CData[arrayOffset + 2] = newUint8CData[arrayOffset + 3] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 2, blurRadius);
-          newUint8CData[arrayOffset + 3] = 255;
-        // } else {
-        //   newUint8CData[arrayOffset + 0] = pixelMatrix[yIndex][xIndex][0];
-        //   newUint8CData[arrayOffset + 1] = pixelMatrix[yIndex][xIndex][1];
-        //   newUint8CData[arrayOffset + 2] = pixelMatrix[yIndex][xIndex][2];
-        //   newUint8CData[arrayOffset + 3] = pixelMatrix[yIndex][xIndex][3];
-        // }
-      // } else {
-      //   newUint8CData[arrayOffset + 0] = pixelMatrix[yIndex][xIndex][0];
-      //   newUint8CData[arrayOffset + 1] = pixelMatrix[yIndex][xIndex][1];
-      //   newUint8CData[arrayOffset + 2] = pixelMatrix[yIndex][xIndex][2];
-      //   newUint8CData[arrayOffset + 3] = pixelMatrix[yIndex][xIndex][3];
-      // }
+
+      newUint8CData[arrayOffset + 0] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 0, blurRadius);
+      newUint8CData[arrayOffset + 1] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 1, blurRadius);
+      newUint8CData[arrayOffset + 2] = newUint8CData[arrayOffset + 3] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 2, blurRadius);
+      newUint8CData[arrayOffset + 3] = 255;
     }
   }
   ;
@@ -301,3 +281,28 @@ export const gaussianMapImageData = (width: number, height: number) => {
   }
   return newUint8CData;
 }
+
+
+
+type CanvasProps = {
+  imageData: ImageData;
+  width: number;
+  height: number;
+};
+
+export const CanvasImage = (props: CanvasProps) => {
+  const { width, height, imageData } = props;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+
+      canvas.width = width;
+      canvas.height = height;
+      context?.putImageData(imageData, 0, 0);
+    }
+  });
+  return <canvas ref={canvasRef} width={width} height={height} />;
+};
