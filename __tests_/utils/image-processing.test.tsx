@@ -3,12 +3,26 @@ import { waitFor } from '@testing-library/dom'
 import { decode, RawImageData } from 'jpeg-js'
 
 import FetchImageOnClient from '@/app/fetch-image'
-import { averageNeighbourByChannel, basicBlur, CanvasImage, checkImageDataIsJPEG, convertImageDataToGrayscale, convertToGrayscale,  getImageDataBuffer, imageDataToDecimalArry, imageDataToPixelMatrix, invertImageData, invertPixelColour, locateSOSinImage, RGBAArray } from '@/app/utils/image-processing'
+import {
+  averageNeighbourByChannel,
+  basicBlur,
+  checkImageDataIsJPEG,
+  convertImageDataToGrayscale,
+  convertToGrayscale,
+  gaussianMapImageData,
+  getImageDataBuffer,
+  imageDataToDecimalArry,
+  imageDataToPixelMatrix,
+  invertImageData,
+  invertPixelColour,
+  locateSOSinImage,
+  RGBAArray
+} from '@/app/utils/image-processing'
 import { pngAPIURL, testTinyJPGURL } from '../mocks/msw.mock'
 
-let testImageData: Blob,
-  testImageDataArray: Uint8Array<ArrayBuffer>,
-  rawImageData: RawImageData<Buffer>
+let testImageData: Blob
+let testImageDataArray: Uint8Array<ArrayBuffer>
+let rawImageData: RawImageData<Buffer>
 
 beforeEach(async () => {
   testImageData = await FetchImageOnClient(testTinyJPGURL) as Blob
@@ -118,6 +132,18 @@ describe('api fetch tests', () => {
       223,  32,  64, 255, 234,  85,  43, 255, 255, 127,   0, 255,
       170,  21, 127, 255, 198,  56,  85, 255, 234,  85,  43, 255,
       128,   0, 191, 255, 170,  21, 127, 255, 223,  32,  64, 255,
+    ]))
+  })
+
+  it('can generate imageData that maps the output of the gaussian function', () => {
+    const data = gaussianMapImageData(5, 5)
+
+    expect(data).toEqual(new Uint8ClampedArray([
+        5,   5,   5, 255,  21,  21,  21, 255,  35,  35,  35, 255,  21,  21,  21, 255,   5,   5,   5, 255,
+       21,  21,  21, 255,  94,  94,  94, 255, 155, 155, 155, 255,  94,  94,  94, 255,  21,  21,  21, 255,
+       35,  35,  35, 255, 155, 155, 155, 255, 255, 255, 255, 255, 155, 155, 155, 255,  35,  35,  35, 255,
+       21,  21,  21, 255,  94,  94,  94, 255, 155, 155, 155, 255,  94,  94,  94, 255,  21,  21,  21, 255,
+        5,   5,   5, 255,  21,  21,  21, 255,  35,  35,  35, 255,  21,  21,  21, 255,   5,   5,   5, 255
     ]))
   })
 })
