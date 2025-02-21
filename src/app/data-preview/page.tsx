@@ -7,10 +7,8 @@ import {
 
 import homeStyles from '../page.module.css';
 import styles from '../id/[image]/page.module.css';
+import CanvasImage  from '../components/canvas-image';
 
-import {
-  CanvasImage,
-} from '@/app/utils/image-processing';
 
 export type ImageOptions = {
   width: number;
@@ -170,6 +168,7 @@ const ImageDataPreviewer = () => {
                     id="edit-pixeldata"
                     data-name="pixeldata"
                     onChange={(e) => onPixeldataChange(e)}
+                    value={previewValues.imageData}
                 />
               </div>
               <div>

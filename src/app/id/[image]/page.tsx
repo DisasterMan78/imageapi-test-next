@@ -4,7 +4,6 @@ import {
   MouseEvent,
   ReactElement,
   useEffect,
-  useRef,
   useState,
 } from 'react';
 import { useParams } from 'next/navigation';
@@ -26,6 +25,7 @@ import {
   invertImageData,
   locateSOSinImage,
 } from '@/app/utils/image-processing';
+import CanvasImage  from '@/app/components/canvas-image';
 
 type APIError = false | string;
 type EditedSize = {

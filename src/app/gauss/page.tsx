@@ -10,9 +10,9 @@ import homeStyles from '../page.module.css';
 import styles from '../id/[image]/page.module.css';
 
 import {
-  CanvasImage,
   gaussianMapImageData,
 } from '@/app/utils/image-processing';
+import CanvasImage  from '../components/canvas-image';
 
 type EditedSize = {
   width: number;
