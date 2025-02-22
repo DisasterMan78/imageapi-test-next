@@ -24,9 +24,9 @@ const  makeGaussian: MakeGaussian = (amplitude, x0, y0, sigmaX, sigmaY) => {
   }.bind(null, amplitude, x0, y0, sigmaX, sigmaY);
 }
 
-export const gaussianMapData = (width: number, height: number) => {
+export const gaussianMapData = (width: number, height: number, amplitude = 255, sigmaXFactor = 5, sigmaYFactor = 5) => {
   const data: number[][] = [];
-  const getGaussianMatrixValue = makeGaussian(255, width / 2, height / 2,  width / 5, height / 5);
+  const getGaussianMatrixValue = makeGaussian(amplitude, width / 2, height / 2,  width / sigmaXFactor, height / sigmaYFactor);
 
   for (let yIndex = 0; yIndex < height; yIndex++) {
     data[yIndex] = [];

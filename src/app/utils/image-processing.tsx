@@ -1,6 +1,5 @@
 import { RawImageData } from "jpeg-js";
 import { gaussianMapData } from "./make-gaussian-matrix";
-import { useEffect, useRef } from "react";
 
 // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-5.html#tail-recursion-elimination-on-conditional-types
 type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N
@@ -15,6 +14,7 @@ export type RGBAArray = [HexValueInDecimal, HexValueInDecimal, HexValueInDecimal
 
 
 export const getImageDataBuffer = async (imageData: Blob) => new Uint8Array(await imageData.arrayBuffer());
+
 
 export const checkImageDataIsJPEG = (imageData: Uint8Array) => {
   // JPGs have a file signature of [0xFF, 0xD8,..., 0xFF, 0xD9] - i.e. the first two
@@ -32,6 +32,7 @@ export const checkImageDataIsJPEG = (imageData: Uint8Array) => {
   }
   return true;
 }
+
 
 /*
 This is a unused function from when I was trying to read and write a JPEG
@@ -58,11 +59,13 @@ export const locateSOSinImage = (imageData: Uint8Array) => {
   return SOSIndex;
 }
 
+
 export const convertToGrayscale = (rgba: RGBAArray) => {
   const grayScale = Math.round((rgba[0] * 0.299) + (rgba[1] * 0.587) + (rgba[2] * 0.114));
 
   return [grayScale, grayScale, grayScale, rgba[3]];
 }
+
 
 export const convertImageDataToGrayscale = (rawImageData: RawImageData<Buffer>) => {
   const pixelData = rawImageData.data;
@@ -90,8 +93,8 @@ export const convertImageDataToGrayscale = (rawImageData: RawImageData<Buffer>) 
   return newUint8CData;
 }
 
-export const invertPixelColour = (rgba: RGBAArray) => [255 - rgba[0], 255 - rgba[1], 255 - rgba[2], rgba[3]];
 
+export const invertPixelColour = (rgba: RGBAArray) => [255 - rgba[0], 255 - rgba[1], 255 - rgba[2], rgba[3]];
 
 
 export const invertImageData = (rawImageData: RawImageData<Buffer>) => {
@@ -120,6 +123,7 @@ export const invertImageData = (rawImageData: RawImageData<Buffer>) => {
   return newUint8CData;
 }
 
+
 type PixelMatrixRow = RGBAArray[]
 type PixelMatrix = PixelMatrixRow[]
 
@@ -145,6 +149,7 @@ export const imageDataToPixelMatrix = (imageData: RawImageData<Buffer>) => {
   return matrix;
 }
 
+
 export const imageDataToDecimalArry = (data: Buffer<ArrayBufferLike>) => {
   // This seems a bit daft, but JS auto-typecasts the hex to decimal
   // You'd think data.map(datum => parseInt(`${datum}`), 16)
@@ -154,8 +159,12 @@ export const imageDataToDecimalArry = (data: Buffer<ArrayBufferLike>) => {
   return array;
 }
 
-const neighboursAtDistance = (pixelMatrix: PixelMatrix, xIndex: number, yIndex: number, channelIndex: number, distance = 1) => {
+
+const averageByWeight = (coreValue: number, secondaryValue: number, weight: number) => weight !== 1 ? coreValue + (weight * (secondaryValue - coreValue)) : secondaryValue;
+
+const neighboursAtDistance = (pixelMatrix: PixelMatrix, xIndex: number, yIndex: number, channelIndex: number, distance = 1, gaussianMatrix: null | number[][] = null) => {
   const size = (distance * 2) + 1;
+  const coreValue = pixelMatrix[yIndex][xIndex][channelIndex];
   const initialX = xIndex - distance;
   const initialY = yIndex - distance;
   const firstRow = pixelMatrix[initialY];
@@ -164,31 +173,43 @@ const neighboursAtDistance = (pixelMatrix: PixelMatrix, xIndex: number, yIndex: 
 
   for (let column = 0; column < size; column++) {
     if (firstRow && firstRow[initialX + column]) {
-      values.push(firstRow[initialX + column][channelIndex]);
+      const weight = gaussianMatrix ? gaussianMatrix[0][column] : 1;
+      values.push(averageByWeight(coreValue, firstRow[initialX + column][channelIndex], weight));
     }
 
     if (lastRow && lastRow[initialX + column]) {
-      values.push(pixelMatrix[initialY + (distance * 2)][initialX + column][channelIndex]);
+      const weight = gaussianMatrix ? gaussianMatrix[size - 1][column] : 1;
+      values.push(averageByWeight(coreValue, lastRow[initialX + column][channelIndex], weight));
     }
   }
 
   for (let row = 1; row < size - 1; row++) {
     const currentRow = pixelMatrix[initialY + row];
     if (currentRow && currentRow[initialX]) {
-      values.push(currentRow[initialX][channelIndex]);
+      const weight = gaussianMatrix ? gaussianMatrix[row][0] : 1;
+      values.push(averageByWeight(coreValue, currentRow[initialX][channelIndex], weight));
     }
     if (currentRow && currentRow[initialX + (distance * 2)]) {
-      values.push(currentRow[initialX + (distance * 2)][channelIndex]);
+      const weight = gaussianMatrix ? gaussianMatrix[row][size - 1] : 1;
+      values.push(averageByWeight(coreValue, currentRow[initialX + (size - 1)][channelIndex], weight));
     }
   }
   return values;
 }
 
-export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: number, xIndex: number, channelIndex: number, distance = 1) => {
+
+export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: number, xIndex: number, channelIndex: number, {
+  blurRadius = 1,
+  gaussianMatrix = null,
+}: {
+    blurRadius?: number;
+    gaussianMatrix?: null | number[][];
+}) => {
   let neighbours: number[] = [];
 
-  for (let index = 1; index < distance + 1; index++) {
-    neighbours = neighbours.concat(neighboursAtDistance(pixelMatrix, xIndex, yIndex, channelIndex, index))
+  for (let distanceFromPixel = 1; distanceFromPixel < blurRadius + 1; distanceFromPixel++) {
+    // console.log("🚀 ~ distanceFromPixel/weight:", distanceFromPixel, weight)
+    neighbours = neighbours.concat(neighboursAtDistance(pixelMatrix, xIndex, yIndex, channelIndex, distanceFromPixel, gaussianMatrix))
   }
 
   neighbours.push(pixelMatrix[yIndex][xIndex][channelIndex]);
@@ -197,6 +218,7 @@ export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: numb
 
   return Math.round(sum / neighbours.length);
 }
+
 
 export const basicBlur = (imageData: RawImageData<Buffer>, blurRadius = 1) => {
   const { width, height } = imageData;
@@ -210,58 +232,42 @@ export const basicBlur = (imageData: RawImageData<Buffer>, blurRadius = 1) => {
     for (let xIndex = 0; xIndex < width; xIndex++) {
       const arrayOffset = (yIndex * (width * 4))  + (xIndex * 4);
 
-      newUint8CData[arrayOffset + 0] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 0, blurRadius);
-      newUint8CData[arrayOffset + 1] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 1, blurRadius);
-      newUint8CData[arrayOffset + 2] = newUint8CData[arrayOffset + 3] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 2, blurRadius);
+      newUint8CData[arrayOffset + 0] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 0, { blurRadius });
+      newUint8CData[arrayOffset + 1] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 1, { blurRadius });
+      newUint8CData[arrayOffset + 2] = newUint8CData[arrayOffset + 3] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 2, { blurRadius });
       newUint8CData[arrayOffset + 3] = 255;
     }
   }
-  ;
+
   return newUint8CData;
 }
 
-export const gaussianBlur = (imageData: RawImageData<Buffer>) => {
+
+export const gaussianBlur = (imageData: RawImageData<Buffer>, blurRadius = 1) => {
   const { width, height } = imageData;
   const pixelMatrix = imageDataToPixelMatrix(imageData);
   const buffer = new ArrayBuffer(
     4 * width * height
   );
   const newUint8CData = new Uint8ClampedArray(buffer);
-
-  const gaussianMatrix = gaussianMapImageData(width, height);
-  console.log(width, height)
-  console.log(Math.round(gaussianMatrix[0][0]))
-  console.log(Math.round(gaussianMatrix[Math.round(width / 2)][Math.round(height / 2)]))
-  console.log(Math.round(gaussianMatrix[width][height]))
+  const blurDiameter = (blurRadius * 2) + 1;
+  const gaussianMatrix = gaussianMapData(blurDiameter, blurDiameter, 1)
+  console.log("🚀 ~ gaussianBlur ~ gaussianMatrix:", gaussianMatrix)
 
   for (let yIndex = 0; yIndex < height; yIndex++) {
     for (let xIndex = 0; xIndex < width; xIndex++) {
-      const arrayOffset = (yIndex * (width * 4))  + (xIndex * 4);
-      // First attempt, ignore first and last rows as the are more complex
-      if (yIndex !== 0 && yIndex !== height - 1) {
-        // And ignore first and last column
-        if (xIndex !== 0 && xIndex !== width - 1) {
-          newUint8CData[arrayOffset + 0] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 0);
-          newUint8CData[arrayOffset + 1] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 1);
-          newUint8CData[arrayOffset + 2] = newUint8CData[arrayOffset + 3] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 2);
-          newUint8CData[arrayOffset + 3] = 255;
-        } else {
-          newUint8CData[arrayOffset + 0] = pixelMatrix[yIndex][xIndex][0];
-          newUint8CData[arrayOffset + 1] = pixelMatrix[yIndex][xIndex][1];
-          newUint8CData[arrayOffset + 2] = pixelMatrix[yIndex][xIndex][2];
-          newUint8CData[arrayOffset + 3] = pixelMatrix[yIndex][xIndex][3];
-        }
-      } else {
-        newUint8CData[arrayOffset + 0] = pixelMatrix[yIndex][xIndex][0];
-        newUint8CData[arrayOffset + 1] = pixelMatrix[yIndex][xIndex][1];
-        newUint8CData[arrayOffset + 2] = pixelMatrix[yIndex][xIndex][2];
-        newUint8CData[arrayOffset + 3] = pixelMatrix[yIndex][xIndex][3];
-      }
+      const arrayOffset = (yIndex * (width * 4)) + (xIndex * 4);
+
+      newUint8CData[arrayOffset + 0] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 0, { blurRadius, gaussianMatrix  });
+      newUint8CData[arrayOffset + 1] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 1, { blurRadius, gaussianMatrix });
+      newUint8CData[arrayOffset + 2] = newUint8CData[arrayOffset + 3] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 2, { blurRadius, gaussianMatrix });
+      newUint8CData[arrayOffset + 3] = 255;
     }
   }
-  ;
+
   return newUint8CData;
 }
+
 
 export const gaussianMapImageData = (width: number, height: number) => {
   // One element per channel, RGBA

@@ -104,13 +104,13 @@ describe('api fetch tests', () => {
   it('can calculate the average value of each colour channel from the 8 pixels around a given pixel in some image data', async () => {
     const pixelMatrix = imageDataToPixelMatrix(rawImageData);
     const red = pixelMatrix[1][1][0];
-    const averageNeighbourRed = averageNeighbourByChannel(pixelMatrix, 1, 1, 0)
+    const averageNeighbourRed = averageNeighbourByChannel(pixelMatrix, 1, 1, 0, {})
 
     const green = pixelMatrix[1][1][1];
-    const averageNeighbourGreen = averageNeighbourByChannel(pixelMatrix, 1, 1, 1)
+    const averageNeighbourGreen = averageNeighbourByChannel(pixelMatrix, 1, 1, 1, {})
 
     const blue = pixelMatrix[1][1][2];
-    const averageNeighbourBlue = averageNeighbourByChannel(pixelMatrix, 1, 1, 2)
+    const averageNeighbourBlue = averageNeighbourByChannel(pixelMatrix, 1, 1, 2, {})
 
     expect(averageNeighbourRed).not.toEqual(red)
     expect(averageNeighbourRed).toEqual(198)

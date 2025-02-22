@@ -23,7 +23,7 @@ import {
   basicBlur,
   getImageDataBuffer,
   invertImageData,
-  locateSOSinImage,
+  gaussianBlur,
 } from '@/app/utils/image-processing';
 import CanvasImage  from '@/app/components/canvas-image';
 
@@ -38,6 +38,7 @@ export type ImageOptions = {
   height: number;
   grayscale: boolean;
   blur: number;
+  localBlur: number;
 };
 
 export type LocalStorageImages = {
@@ -55,6 +56,7 @@ export const editorDefaults = {
   height: imageHeight,
   grayscale: false,
   blur: 0,
+  localBlur: 1,
 };
 
 const getDownloadURL = (
@@ -99,6 +101,7 @@ const ImageEditor = () => {
   const [convertedImage, setConvertedImage] =
     useState<null | ReactElement<HTMLCanvasElement>>(null);
   const [conversionInProgress, setConversionInProgress] = useState(false);
+  const [localBlur, setLocalBlur] = useState(editorInitialValues.localBlur);
 
   useEffect(() => {
     setDataIsLoading(true);
@@ -146,23 +149,26 @@ const ImageEditor = () => {
           height: value as number,
           width: editedSize.width,
         });
-
         break;
+
       case 'width':
         setEditedSize({
           height: editedSize.height,
           width: value as number,
         });
-
         break;
+
       case 'grayscale':
         setGrayscale(value as boolean);
-
         break;
+
       case 'blur':
         setBlur(value as number);
-
         break;
+
+      case 'localBlur':
+        setLocalBlur(value as number);
+          break;
 
       default:
         break;
@@ -245,6 +251,10 @@ const ImageEditor = () => {
         console.log('basicBlur level:', blurLevel)
         processedData = basicBlur(rawImageData, parseInt(blurLevel));
         break;
+
+      case 'gaussianBlur':
+          processedData = gaussianBlur(rawImageData, parseInt(clickedButton.getAttribute('data-blur-radius') as string));
+          break;
 
       default:
         throw new Error("Processing function not set");
@@ -427,12 +437,36 @@ const ImageEditor = () => {
                   blur
                 )}
                 data-processing-fn={'basicBlur'}
-                data-blur-radius={10}
+                data-blur-radius={localBlur}
                 onClick={(e) => onJSConvertClick(e)}
               >
-                Blur (2px)
+                Blur ({localBlur}px)
               </button>
-              <br />
+              <button
+                data-image-url={getDownloadURL(
+                  image?.download_url as string,
+                  editedSize,
+                  grayscale,
+                  blur
+                )}
+                data-processing-fn={'gaussianBlur'}
+                data-blur-radius={localBlur}
+                onClick={(e) => onJSConvertClick(e)}
+              >
+                Gaussian Blur ({localBlur}px)
+              </button>
+                <input
+                  type="number"
+                  id="localBlur"
+                  data-name="localBlur"
+                  data-imageid={image?.id}
+                  min="1"
+                  step="1"
+                  value={localBlur}
+                  onChange={(e) => onInputChange(e)}
+                />
+            </div>
+            <div>
               {convertWithJS && convertedImage ? (
                 <div>{convertedImage}</div>
               ) : (
