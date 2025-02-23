@@ -20,12 +20,12 @@ import FetchImageOnClient from '@/app/fetch-image';
 import { decode, RawImageData } from 'jpeg-js';
 import {
   convertImageDataToGrayscale,
-  basicBlur,
   getImageDataBuffer,
   invertImageData,
-  gaussianBlur,
 } from '@/app/utils/image-processing';
 import CanvasImage  from '@/app/components/canvas-image';
+import basicBlur from '@/app/utils/basic-blur';
+import { gaussianBlur } from '@/app/utils/gaussian-blur';
 
 type APIError = false | string;
 type EditedSize = {

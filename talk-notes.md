@@ -17,5 +17,11 @@ https://en.wikipedia.org/wiki/Gaussian_blur
 
 https://www.pixelstech.net/article/1353768112-gaussian-blur-algorithm"
 
+https://computergraphics.stackexchange.com/questions/39/how-is-gaussian-blur-implemented
+
 "It's like a layer / mask of gaussian data that you're putting on top of your base image, like a sort of blur-paint-by-numbers?"
 @mapgie.co.uk on Bluesky
+
+Accidental motion blur: commit 834e227a15e5cca12504ee83330fa702b913ec6f
+
+

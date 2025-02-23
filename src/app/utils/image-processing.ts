@@ -125,7 +125,7 @@ export const invertImageData = (rawImageData: RawImageData<Buffer>) => {
 
 
 type PixelMatrixRow = RGBAArray[]
-type PixelMatrix = PixelMatrixRow[]
+export type PixelMatrix = PixelMatrixRow[]
 
 export const imageDataToPixelMatrix = (imageData: RawImageData<Buffer>) => {
   const { width, height, data } = imageData;
@@ -157,115 +157,6 @@ export const imageDataToDecimalArry = (data: Buffer<ArrayBufferLike>) => {
   const array: number[] = [];
   data.forEach(datum => array.push(datum))
   return array;
-}
-
-
-const averageByWeight = (coreValue: number, secondaryValue: number, weight: number) => weight !== 1 ? coreValue + (weight * (secondaryValue - coreValue)) : secondaryValue;
-
-const neighboursAtDistance = (pixelMatrix: PixelMatrix, xIndex: number, yIndex: number, channelIndex: number, distance = 1, gaussianMatrix: null | number[][] = null) => {
-  const size = (distance * 2) + 1;
-  const coreValue = pixelMatrix[yIndex][xIndex][channelIndex];
-  const initialX = xIndex - distance;
-  const initialY = yIndex - distance;
-  const firstRow = pixelMatrix[initialY];
-  const lastRow = pixelMatrix[initialY + (distance * 2)];
-  const values: number[] = [];
-
-  for (let column = 0; column < size; column++) {
-    if (firstRow && firstRow[initialX + column]) {
-      const weight = gaussianMatrix ? gaussianMatrix[0][column] : 1;
-      values.push(averageByWeight(coreValue, firstRow[initialX + column][channelIndex], weight));
-    }
-
-    if (lastRow && lastRow[initialX + column]) {
-      const weight = gaussianMatrix ? gaussianMatrix[size - 1][column] : 1;
-      values.push(averageByWeight(coreValue, lastRow[initialX + column][channelIndex], weight));
-    }
-  }
-
-  for (let row = 1; row < size - 1; row++) {
-    const currentRow = pixelMatrix[initialY + row];
-    if (currentRow && currentRow[initialX]) {
-      const weight = gaussianMatrix ? gaussianMatrix[row][0] : 1;
-      values.push(averageByWeight(coreValue, currentRow[initialX][channelIndex], weight));
-    }
-    if (currentRow && currentRow[initialX + (distance * 2)]) {
-      const weight = gaussianMatrix ? gaussianMatrix[row][size - 1] : 1;
-      values.push(averageByWeight(coreValue, currentRow[initialX + (size - 1)][channelIndex], weight));
-    }
-  }
-  return values;
-}
-
-
-export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: number, xIndex: number, channelIndex: number, {
-  blurRadius = 1,
-  gaussianMatrix = null,
-}: {
-    blurRadius?: number;
-    gaussianMatrix?: null | number[][];
-}) => {
-  let neighbours: number[] = [];
-
-  for (let distanceFromPixel = 1; distanceFromPixel < blurRadius + 1; distanceFromPixel++) {
-    // console.log("🚀 ~ distanceFromPixel/weight:", distanceFromPixel, weight)
-    neighbours = neighbours.concat(neighboursAtDistance(pixelMatrix, xIndex, yIndex, channelIndex, distanceFromPixel, gaussianMatrix))
-  }
-
-  neighbours.push(pixelMatrix[yIndex][xIndex][channelIndex]);
-
-  const sum = neighbours.reduce((accumulator, value) => accumulator + value, 0);
-
-  return Math.round(sum / neighbours.length);
-}
-
-
-export const basicBlur = (imageData: RawImageData<Buffer>, blurRadius = 1) => {
-  const { width, height } = imageData;
-  const pixelMatrix = imageDataToPixelMatrix(imageData);
-  const buffer = new ArrayBuffer(
-    4 * width * height
-  );
-  const newUint8CData = new Uint8ClampedArray(buffer);
-
-  for (let yIndex = 0; yIndex < height; yIndex++) {
-    for (let xIndex = 0; xIndex < width; xIndex++) {
-      const arrayOffset = (yIndex * (width * 4))  + (xIndex * 4);
-
-      newUint8CData[arrayOffset + 0] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 0, { blurRadius });
-      newUint8CData[arrayOffset + 1] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 1, { blurRadius });
-      newUint8CData[arrayOffset + 2] = newUint8CData[arrayOffset + 3] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 2, { blurRadius });
-      newUint8CData[arrayOffset + 3] = 255;
-    }
-  }
-
-  return newUint8CData;
-}
-
-
-export const gaussianBlur = (imageData: RawImageData<Buffer>, blurRadius = 1) => {
-  const { width, height } = imageData;
-  const pixelMatrix = imageDataToPixelMatrix(imageData);
-  const buffer = new ArrayBuffer(
-    4 * width * height
-  );
-  const newUint8CData = new Uint8ClampedArray(buffer);
-  const blurDiameter = (blurRadius * 2) + 1;
-  const gaussianMatrix = gaussianMapData(blurDiameter, blurDiameter, 1)
-  console.log("🚀 ~ gaussianBlur ~ gaussianMatrix:", gaussianMatrix)
-
-  for (let yIndex = 0; yIndex < height; yIndex++) {
-    for (let xIndex = 0; xIndex < width; xIndex++) {
-      const arrayOffset = (yIndex * (width * 4)) + (xIndex * 4);
-
-      newUint8CData[arrayOffset + 0] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 0, { blurRadius, gaussianMatrix  });
-      newUint8CData[arrayOffset + 1] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 1, { blurRadius, gaussianMatrix });
-      newUint8CData[arrayOffset + 2] = newUint8CData[arrayOffset + 3] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 2, { blurRadius, gaussianMatrix });
-      newUint8CData[arrayOffset + 3] = 255;
-    }
-  }
-
-  return newUint8CData;
 }
 
 
