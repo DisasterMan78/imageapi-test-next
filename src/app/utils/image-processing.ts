@@ -8,7 +8,7 @@ type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] exte
 
 type IntRange<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate<F>>
 
-type HexValueInDecimal = IntRange<0, 255>;
+export type HexValueInDecimal = IntRange<0, 255>;
 
 export type RGBAArray = [HexValueInDecimal, HexValueInDecimal, HexValueInDecimal, HexValueInDecimal];
 
@@ -64,6 +64,25 @@ export const convertToGrayscale = (rgba: RGBAArray) => {
   const grayScale = Math.round((rgba[0] * 0.299) + (rgba[1] * 0.587) + (rgba[2] * 0.114));
 
   return [grayScale, grayScale, grayScale, rgba[3]];
+}
+
+
+export const originalData = (rawImageData: RawImageData<Buffer>) => {
+  const pixelData = rawImageData.data;
+  const buffer = new ArrayBuffer(
+    4 * rawImageData.width * rawImageData.height
+  );
+  const newUint8CData = new Uint8ClampedArray(buffer);
+
+  for (let index = 0; index < pixelData.length; index = index + 4) {
+
+    newUint8CData[index] = pixelData[index];
+    newUint8CData[index + 1] = pixelData[index + 1];
+    newUint8CData[index + 2] = pixelData[index + 2];
+    newUint8CData[index + 3] = pixelData[index + 3];
+  }
+
+  return newUint8CData;
 }
 
 

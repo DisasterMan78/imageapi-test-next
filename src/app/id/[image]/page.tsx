@@ -22,10 +22,11 @@ import {
   convertImageDataToGrayscale,
   getImageDataBuffer,
   invertImageData,
+  originalData,
 } from '@/app/utils/image-processing';
 import CanvasImage  from '@/app/components/canvas-image';
 import basicBlur from '@/app/utils/basic-blur';
-import { gaussianBlur } from '@/app/utils/gaussian-blur';
+import gaussianBlur from '@/app/utils/gaussian-blur';
 
 type APIError = false | string;
 type EditedSize = {
@@ -63,7 +64,7 @@ const getDownloadURL = (
   url: string,
   editedSize: EditedSize,
   grayscale: boolean,
-  blur: number
+  blur: number,
 ) =>
   url.replace(
     /\d*\/\d*$/,
@@ -74,7 +75,7 @@ const getDownloadURL = (
 
 const ImageEditor = () => {
   const params = useParams();
-  let itemStorage = null;
+  let itemStorage = editorDefaults;
 
   if (typeof window !== 'undefined') {
     const storageId = `image-id-${params.image}`;
@@ -83,25 +84,25 @@ const ImageEditor = () => {
 
     if (itemStorage == null) {
       localStorage.setItem(storageId, JSON.stringify(editorDefaults));
+      // Removing this redundant line causes WallabyJS to shit the bed?
       itemStorage = editorDefaults;
     }
   }
-  const editorInitialValues: ImageOptions = itemStorage;
 
   const [image, setImage] = useState<PicsumImage>();
   const [dataIsLoading, setDataIsLoading] = useState(true);
   const [hasDataError, setHasDataError] = useState<APIError>(false);
   const [editedSize, setEditedSize] = useState<EditedSize>({
-    height: editorInitialValues.height,
-    width: editorInitialValues.width,
+    height: itemStorage.height,
+    width: itemStorage.width,
   });
-  const [grayscale, setGrayscale] = useState(editorInitialValues.grayscale);
-  const [blur, setBlur] = useState(editorInitialValues.blur);
+  const [grayscale, setGrayscale] = useState(itemStorage.grayscale);
+  const [blur, setBlur] = useState(itemStorage.blur);
   const [convertWithJS, setConvertWithJS] = useState(false);
   const [convertedImage, setConvertedImage] =
     useState<null | ReactElement<HTMLCanvasElement>>(null);
   const [conversionInProgress, setConversionInProgress] = useState(false);
-  const [localBlur, setLocalBlur] = useState(editorInitialValues.localBlur);
+  const [localBlur, setLocalBlur] = useState(itemStorage.localBlur);
 
   useEffect(() => {
     setDataIsLoading(true);
@@ -238,6 +239,10 @@ const ImageEditor = () => {
     ));
 
     switch (functionName) {
+      case 'original':
+        processedData = originalData(rawImageData);
+        break;
+
       case 'convertToGrayscale':
         processedData = convertImageDataToGrayscale(rawImageData);
         break;
@@ -392,6 +397,18 @@ const ImageEditor = () => {
               <h3>Experimental:</h3>
               <p>These functions process image data in pure Javascript in the browser</p>
               <br />
+              <button
+                data-image-url={getDownloadURL(
+                  image?.download_url as string,
+                  editedSize,
+                  grayscale,
+                  blur
+                )}
+                data-processing-fn={'original'}
+                onClick={(e) => onJSConvertClick(e)}
+              >
+                Original
+              </button>
               <button
                 data-image-url={getDownloadURL(
                   image?.download_url as string,
