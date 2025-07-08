@@ -3,15 +3,13 @@ import { HexValueInDecimal, imageDataToPixelMatrix, PixelMatrix } from "./image-
 import { gaussianMapData } from "./make-gaussian-matrix";
 
 
-const averageByWeight = (coreValue: number, secondaryValue: number, weight: number) => {
-  const weightedValue = coreValue + (weight * (secondaryValue - coreValue));
-  return weight !== 1 ? weightedValue : secondaryValue;
-}
+export const averageByWeight = (coreValue: number, secondaryValue: number, weight: number) => coreValue + (weight * (secondaryValue - coreValue));
+
 
 export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: number, xIndex: number, channelIndex: number, blurRadius: number, gaussianMatrix: number[][]) => {
   const size = (blurRadius * 2) + 1;
   const initialX = xIndex - blurRadius;
-  const initialY = yIndex - blurRadius;
+  const initialY = yIndex - (2 * blurRadius);
 
   let newValue = pixelMatrix[yIndex][xIndex][channelIndex];
 
@@ -28,6 +26,7 @@ export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: numb
       }
     }
   }
+
   return newValue;
 }
 
