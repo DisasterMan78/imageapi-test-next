@@ -3,7 +3,7 @@ import { getImageDataBuffer, imageDataToDecimalArry, imageDataToPixelMatrix } fr
 
 import { testTinyJPGURL } from '../mocks/msw.mock'
 import { decode, RawImageData } from "jpeg-js";
-import FetchImageOnClient from "@/app/fetch-image";
+import FetchImageOnClient from "@/app/utils/fetch-image";
 
 let testImageData: Blob
 let testImageDataArray: Uint8Array<ArrayBuffer>

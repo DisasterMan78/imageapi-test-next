@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation'
 
 import styles from './page.module.css';
-import FetchApiOnClient from './fetch-api';
+import FetchApiOnClient from './utils/fetch-api';
 
 import LoadingSpinner from './components/loading-spinner';
 import ImageGrid, { ImageGridProps } from './components/image-grid';

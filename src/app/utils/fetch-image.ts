@@ -1,3 +1,6 @@
+/* eslint-disable @next/next/no-async-client-component */
+'use client';
+
 const FetchImageOnClient = async (imageURL: string): Promise<Blob | Error> => {
   let data;
   try {
@@ -8,12 +11,12 @@ const FetchImageOnClient = async (imageURL: string): Promise<Blob | Error> => {
     });
 
     if (response.status !== 200) {
-      throw Error(`Failed to fetch image: ${response.status} - ${response.statusText}`);
+      throw new Error(`Failed to fetch image: ${response.status} - ${response.statusText} - ${await response.text()}`);
     }
 
     data = await response.blob();
   } catch (error) {
-    return error as Error;
+    return Promise.reject(error as Error);
   }
 
   return data;

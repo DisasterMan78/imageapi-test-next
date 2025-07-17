@@ -2,7 +2,7 @@ import {http, HttpResponse} from 'msw'
 import {setupServer} from 'msw/node'
 import '@testing-library/jest-dom'
 
-import FetchApiOnClient from '../src/app/fetch-api';
+import FetchApiOnClient from '../../src/app/utils/fetch-api';
 
 const testApiURL = 'http://fake.api/test';
 const testResponse = { someKey: 'Some string data' }

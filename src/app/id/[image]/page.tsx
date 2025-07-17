@@ -6,27 +6,29 @@ import {
   useEffect,
   useState,
 } from 'react';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
+import { decode, RawImageData } from 'jpeg-js';
 
-import homeStyles from '../../page.module.css';
+import homeStyles from '@/app/page.module.css';
 import styles from './page.module.css';
 
-import FetchApiOnClient from '../../fetch-api';
-import LoadingSpinner from '../../components/loading-spinner';
-import { PicsumImage } from '../../components/image-grid';
-import Link from 'next/link';
-import FetchImageOnClient from '@/app/fetch-image';
-import { decode, RawImageData } from 'jpeg-js';
+import FetchImageOnClient from '@/app/utils/fetch-image';
+import FetchApiOnClient from '@/app/utils/fetch-api';
 import {
   convertImageDataToGrayscale,
   getImageDataBuffer,
   invertImageData,
   originalData,
 } from '@/app/utils/image-processing';
-import CanvasImage  from '@/app/components/canvas-image';
 import basicBlur from '@/app/utils/basic-blur';
 import gaussianBlur from '@/app/utils/gaussian-blur';
+
+import LoadingSpinner from '@/app/components/loading-spinner';
+import { PicsumImage } from '@/app/components/image-grid';
+import CanvasImage from '@/app/components/canvas-image';
+import {default as ErrorUI} from '@/app/error';
 
 type APIError = false | string;
 type EditedSize = {
@@ -89,6 +91,7 @@ const ImageEditor = () => {
     }
   }
 
+  const [error, setError] = useState<null | Error>(null)
   const [image, setImage] = useState<PicsumImage>();
   const [dataIsLoading, setDataIsLoading] = useState(true);
   const [hasDataError, setHasDataError] = useState<APIError>(false);
@@ -192,9 +195,14 @@ const ImageEditor = () => {
     const clickedButton = e.currentTarget;
     const url = clickedButton.getAttribute('data-image-url') as string;
     const functionName = clickedButton.getAttribute('data-processing-fn');
-    const imageData = (await FetchImageOnClient(url)) as Blob;
+
+    const imageData = await FetchImageOnClient(url)
+      .catch(error => {
+        setError(error as Error)
+      });
+
     const imageDataBuffer = (await getImageDataBuffer(
-      imageData
+      imageData as Blob
     )) as Uint8Array<ArrayBuffer>;
 
     // const SOSIndex = locateSOSinImage(imageDataBuffer);
@@ -262,7 +270,7 @@ const ImageEditor = () => {
           break;
 
       default:
-        throw new Error("Processing function not set");
+        throw new Error('Processing function not set');
     }
 
     const newCanvasImage = (
@@ -277,6 +285,10 @@ const ImageEditor = () => {
     setConvertedImage(newCanvasImage);
     setConversionInProgress(false);
   };
+
+  if (error) {
+    return (<ErrorUI error={error} reset={() => { }} />)
+  }
 
   return (
     <div className={homeStyles.page}>

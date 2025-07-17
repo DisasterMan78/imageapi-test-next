@@ -6,7 +6,7 @@ import { render } from '@testing-library/react';
 import CanvasImage from '@/app/components/canvas-image';
 import { testTinyJPGURL } from '../mocks/msw.mock'
 import { decode, RawImageData } from 'jpeg-js';
-import FetchImageOnClient from '@/app/fetch-image';
+import FetchImageOnClient from '@/app/utils/fetch-image';
 import { getImageDataBuffer } from '@/app/utils/image-processing';
 
 let testImageData: Blob

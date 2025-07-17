@@ -2,7 +2,7 @@ import '@testing-library/jest-dom'
 import { waitFor } from '@testing-library/dom'
 import { decode, RawImageData } from 'jpeg-js'
 
-import FetchImageOnClient from '@/app/fetch-image'
+import FetchImageOnClient from '@/app/utils/fetch-image'
 import {
   checkImageDataIsJPEG,
   convertImageDataToGrayscale,
