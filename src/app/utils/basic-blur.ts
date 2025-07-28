@@ -2,50 +2,24 @@ import { RawImageData } from "jpeg-js";
 import { imageDataToPixelMatrix, PixelMatrix } from "./image-processing";
 
 
-const neighboursAtDistance = (pixelMatrix: PixelMatrix, xIndex: number, yIndex: number, channelIndex: number, distance = 1) => {
-  const size = (distance * 2) + 1;
-  const initialX = xIndex - distance;
-  const initialY = yIndex - distance;
-  const firstRow = pixelMatrix[initialY];
-  const lastRow = pixelMatrix[initialY + (distance * 2)];
-  const values: number[] = [];
+export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: number, xIndex: number, channelIndex: number, blurRadius: number) => {
+  const size = (blurRadius * 2) + 1;
+  const initialX = xIndex - blurRadius;
+  const initialY = yIndex - (2 * blurRadius);
+  const neighbours: number[] = [];
 
-  for (let column = 0; column < size; column++) {
-    if (firstRow && firstRow[initialX + column]) {
-      values.push(firstRow[initialX + column][channelIndex]);
-    }
-
-    if (lastRow && lastRow[initialX + column]) {
-      values.push(lastRow[initialX + column][channelIndex]);
-    }
-  }
-
-  for (let row = 1; row < size - 1; row++) {
+  for (let row = 0; row < size; row++) {
     const currentRow = pixelMatrix[initialY + row];
-    if (currentRow && currentRow[initialX]) {
-      values.push(currentRow[initialX][channelIndex]);
-    }
-    if (currentRow && currentRow[initialX + (distance * 2)]) {
-      values.push(currentRow[initialX + (size - 1)][channelIndex]);
+    if (currentRow) {
+      for (let column = 0; column < size; column++) {
+        const currentColumn = initialX + column;
+        if (currentRow[currentColumn]) {
+
+          neighbours.push(currentRow[currentColumn][channelIndex]);
+        }
+      }
     }
   }
-  return values;
-}
-
-
-export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: number, xIndex: number, channelIndex: number, {
-  blurRadius = 1,
-}: {
-    blurRadius?: number;
-    gaussianMatrix?: null | number[][];
-}) => {
-  let neighbours: number[] = [];
-
-  for (let distanceFromPixel = 1; distanceFromPixel < blurRadius + 1; distanceFromPixel++) {
-    neighbours = neighbours.concat(neighboursAtDistance(pixelMatrix, xIndex, yIndex, channelIndex, distanceFromPixel))
-  }
-
-  neighbours.push(pixelMatrix[yIndex][xIndex][channelIndex]);
 
   const sum = neighbours.reduce((accumulator, value) => accumulator + value, 0);
 
@@ -65,9 +39,9 @@ const basicBlur = (imageData: RawImageData<Buffer>, blurRadius = 1) => {
     for (let xIndex = 0; xIndex < width; xIndex++) {
       const arrayOffset = (yIndex * (width * 4))  + (xIndex * 4);
 
-      newUint8CData[arrayOffset + 0] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 0, { blurRadius });
-      newUint8CData[arrayOffset + 1] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 1, { blurRadius });
-      newUint8CData[arrayOffset + 2] = newUint8CData[arrayOffset + 3] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 2, { blurRadius });
+      newUint8CData[arrayOffset + 0] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 0, blurRadius);
+      newUint8CData[arrayOffset + 1] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 1, blurRadius);
+      newUint8CData[arrayOffset + 2] = newUint8CData[arrayOffset + 3] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 2, blurRadius);
       newUint8CData[arrayOffset + 3] = 255;
     }
   }
