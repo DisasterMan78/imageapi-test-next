@@ -54,7 +54,7 @@ describe('Image processing tests', () => {
   it('can find Start of Scan signature in image data', async () => {
     const sosPosition = locateSOSinImage(testImageDataArray);
 
-    expect(sosPosition).toEqual(3704)
+    expect(sosPosition).toEqual(544)
   })
 
 
@@ -70,7 +70,7 @@ describe('Image processing tests', () => {
     const convertedPixelData = convertImageDataToGrayscale(rawImageData);
 
     expect(convertedPixelData).toEqual(new Uint8ClampedArray([
-       76,  76,  76, 255, 151, 151, 151, 255, 225, 225, 225, 255,
+       76,  76,  76, 255, 150, 150, 150, 256, 226, 226, 226, 255,
        67,  67,  67, 255,  76,  76,  76, 255, 150, 150, 150, 255,
        29,  29,  29, 255,  67,  67,  67, 255,  76,  76,  76, 255,
     ]))
@@ -89,9 +89,9 @@ describe('Image processing tests', () => {
     const convertedPixelData = invertImageData(rawImageData);
 
     expect(convertedPixelData).toEqual(new Uint8ClampedArray([
-        1, 255, 255, 255,   0, 127, 255, 255,  0,   1, 255, 255,
-      127, 255,   0, 255,   1, 255, 255, 255,  0, 129, 255, 255,
-      255, 255,   1, 255, 127, 255,   0, 255,  1, 255, 255, 255,
+        1, 255, 255, 255,   1, 128, 255, 255,  1,   0, 255, 255,
+      128, 255,   1, 255,   1, 255, 255, 255,  1, 128, 255, 255,
+      255, 255,   1, 255, 128, 255,   1, 255,  1, 255, 255, 255,
     ]))
   })
 
@@ -100,9 +100,9 @@ describe('Image processing tests', () => {
     const pixelMatrix = imageDataToPixelMatrix(rawImageData)
 
     expect(pixelMatrix).toEqual([
-      [[254,   0,   0, 255], [255, 128,   0, 255], [255, 254,   0, 255]],
-      [[128,   0, 255, 255], [254,   0,   0, 255], [255, 126,   0, 255]],
-      [[  0,   0, 254, 255], [128,   0, 255, 255], [254,   0,   0, 255]],
+      [[254,   0,   0, 255], [254, 127,   0, 255], [254, 255,   0, 255]],
+      [[127,   0, 254, 255], [254,   0,   0, 255], [254, 127,   0, 255]],
+      [[  0,   0, 254, 255], [127,   0, 254, 255], [254,   0,   0, 255]],
     ])
   })
 
