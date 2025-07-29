@@ -66,38 +66,15 @@ R:198,
 G: 57.
 B: 85,
 
-Currently getting:
-R: 233,
-G: 85,
-B: 42,
+After removing the double y offset, the tests now get all the expected results from manual calculations!
 
-Clearly the values don't match, but what's really odd is it looks like the G/B channel values may be transposed?
+But the negative y offset is back on the final result, as
+also expected.
 
-Either I've messed up somewhere, or RGB isn't the order
-used, which seems unlikely, as AFAIK, the only other order generally used is BGR, depending on decoding method (eg cv2 in Python) and *not* RBG, which the data is suggesting.
+Clearly what I had before was a bodge fix.
 
-So, let's check the raw image data:
-{
-  '0': 254,
-  '1': 0,
-  '2': 0,
-  '3': 255,
-  '4': 254,
-  '5': 127,
-  '6': 0,
-  '7': 255,
-  [...]
-}
+Which just goes to prove the value of careful testing...
 
-Indices [4, 5, 6] are the colour channel data for pixel 2 (orange) and yes, [254, 127, 0] are the expected RGB values in the correct order.
-
-So... where have I cocked up?
-
-OK, so it seems that the initialY offset is the problem -
-I'm only getting 6 values for each channel, none for the
-first row. Removing the double blur radius will fix this,
-but then the weird offset problem for the whole image
-result will return.
 */
   it('can calculate the average value of each colour channel from the 8 pixels around the central pixel in 3x3px image data', async () => {
     // Central pixel is at coordinates 1,1 in the 3x3 image

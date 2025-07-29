@@ -6,20 +6,15 @@ export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: numb
   const size = (blurRadius * 2) + 1;
   const initialX = xIndex - blurRadius;
   const initialY = yIndex - blurRadius;
-  console.log("🚀 ~ averageNeighbourByChannel ~ initialY:", initialY)
   const neighbours: number[] = [];
-  let counter = 0;
 
   for (let row = 0; row < size; row++) {
-    console.log("🚀 ~ averageNeighbourByChannel ~ row:", row)
     const currentRow = pixelMatrix[initialY + row];
+
     if (currentRow) {
       for (let column = 0; column < size; column++) {
-        console.log("🚀 ~ averageNeighbourByChannel ~ column:", column)
-        counter++;
-        console.log("🚀 ~ averageNeighbourByChannel ~ counter:", counter)
-
         const currentColumn = initialX + column;
+
         if (currentRow[currentColumn]) {
 
           neighbours.push(currentRow[currentColumn][channelIndex]);
@@ -29,7 +24,6 @@ export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: numb
   }
 
   const sum = neighbours.reduce((accumulator, value) => accumulator + value, 0);
-  console.log("🚀 ~ averageNeighbourByChannel ~ sum, length:", sum, neighbours.length)
 
   return Math.round(sum / neighbours.length);
 }
