@@ -5,13 +5,20 @@ import { imageDataToPixelMatrix, PixelMatrix } from "./image-processing";
 export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: number, xIndex: number, channelIndex: number, blurRadius: number) => {
   const size = (blurRadius * 2) + 1;
   const initialX = xIndex - blurRadius;
-  const initialY = yIndex - (2 * blurRadius);
+  const initialY = yIndex - blurRadius;
+  console.log("🚀 ~ averageNeighbourByChannel ~ initialY:", initialY)
   const neighbours: number[] = [];
+  let counter = 0;
 
   for (let row = 0; row < size; row++) {
+    console.log("🚀 ~ averageNeighbourByChannel ~ row:", row)
     const currentRow = pixelMatrix[initialY + row];
     if (currentRow) {
       for (let column = 0; column < size; column++) {
+        console.log("🚀 ~ averageNeighbourByChannel ~ column:", column)
+        counter++;
+        console.log("🚀 ~ averageNeighbourByChannel ~ counter:", counter)
+
         const currentColumn = initialX + column;
         if (currentRow[currentColumn]) {
 
@@ -22,6 +29,7 @@ export const averageNeighbourByChannel = (pixelMatrix: PixelMatrix, yIndex: numb
   }
 
   const sum = neighbours.reduce((accumulator, value) => accumulator + value, 0);
+  console.log("🚀 ~ averageNeighbourByChannel ~ sum, length:", sum, neighbours.length)
 
   return Math.round(sum / neighbours.length);
 }
@@ -39,9 +47,13 @@ const basicBlur = (imageData: RawImageData<Buffer>, blurRadius = 1) => {
     for (let xIndex = 0; xIndex < width; xIndex++) {
       const arrayOffset = (yIndex * (width * 4))  + (xIndex * 4);
 
+      // Red
       newUint8CData[arrayOffset + 0] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 0, blurRadius);
+      // Green
       newUint8CData[arrayOffset + 1] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 1, blurRadius);
+      // Blue
       newUint8CData[arrayOffset + 2] = newUint8CData[arrayOffset + 3] = averageNeighbourByChannel(pixelMatrix, yIndex, xIndex, 2, blurRadius);
+      // Alpha - don't do calculations on transparency
       newUint8CData[arrayOffset + 3] = 255;
     }
   }
