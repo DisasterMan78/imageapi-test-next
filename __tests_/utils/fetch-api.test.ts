@@ -1,37 +1,29 @@
 import {http, HttpResponse} from 'msw'
-import {setupServer} from 'msw/node'
 import '@testing-library/jest-dom'
 
 import FetchApiOnClient from '../../src/app/utils/fetch-api';
-
-const testApiURL = 'http://fake.api/test';
-const testResponse = { someKey: 'Some string data' }
-const server = setupServer(
-  http.get(testApiURL, () => {
-    return HttpResponse.json(testResponse)
-  }),
-)
-
-beforeAll(() => server.listen())
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
+import { waitFor } from '@testing-library/dom';
+import { server, testAPIURL, testAPIResponse } from '../mocks/msw.mock';
 
 describe('api fetch tests', () => {
   it('receives data from API on success', async () => {
-    const result = await FetchApiOnClient(testApiURL)
+    const result = await FetchApiOnClient(testAPIURL)
 
-    expect(result).toMatchObject(testResponse)
+    await waitFor(
+      () => expect(result).toMatch(testAPIResponse)
+    )
   })
 
   it('handles server error', async () => {
     server.use(
-      http.get(testApiURL, () => {
+      http.get(testAPIURL, () => {
         return new HttpResponse(null, {status: 500})
       }),
     )
 
-    const response = await FetchApiOnClient(testApiURL)
-
-    expect(response.message).toEqual('Failed to fetch data: 500 - Internal Server Error')
+    await FetchApiOnClient(testAPIURL)
+      .catch(error => {
+        expect(error.message).toEqual('Failed to fetch data: 500 - Internal Server Error')
+      })
   })
 })

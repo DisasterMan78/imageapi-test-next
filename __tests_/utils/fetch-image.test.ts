@@ -3,11 +3,11 @@ import '@testing-library/jest-dom'
 
 import FetchImageOnClient from '@/app/utils/fetch-image'
 import { waitFor } from '@testing-library/dom'
-import { server, testAPIURL, testJPGResponse } from '../mocks/msw.mock'
+import { server, testImageAPIURL, testJPGResponse } from '../mocks/msw.mock'
 
 describe('api fetch tests', () => {
   it('receives data from API on success', async () => {
-    const result = await FetchImageOnClient(testAPIURL)
+    const result = await FetchImageOnClient(testImageAPIURL)
     const testBlob = new Blob([new Uint8Array(testJPGResponse)], {type: 'image/jpeg' });
 
     await waitFor(
@@ -17,12 +17,12 @@ describe('api fetch tests', () => {
 
   it('handles server error', async () => {
     server.use(
-      http.get(testAPIURL, () => {
+      http.get(testImageAPIURL, () => {
         return new HttpResponse(null, {status: 500})
       }),
     )
 
-    await FetchImageOnClient(testAPIURL)
+    await FetchImageOnClient(testImageAPIURL)
       .catch(error => {
         expect(error.message).toEqual('Failed to fetch image: 500 - Internal Server Error - ')
       })

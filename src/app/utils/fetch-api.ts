@@ -1,4 +1,4 @@
-const FetchApiOnClient = async (apiURL: string) => {
+export const FetchApiOnClient = async (apiURL: string) => {
   let data;
   try {
     const response = await fetch(apiURL, {

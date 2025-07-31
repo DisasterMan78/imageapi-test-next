@@ -4,7 +4,8 @@ import { setupServer } from "msw/node";
 import { resolve } from 'path';
 
 export const testAPIURL = 'http://fake.api/test'
-// export const remoteImageUrl =  'https://picsum.photos/id/13/750/500.jpg'
+export const testImageAPIURL = 'http://fake.api/image'
+export const testAPIResponse = JSON.stringify({ someKey: 'Some string data' })
 export const testJPGResponse = readFileSync(resolve(__dirname, '../test-image-picsum-13-750x500.jpg'))
 export const testSmallJPGURL = 'http://fake.api/smalltiny-jpg'
 const testSmallJPGResponse =  readFileSync(resolve(__dirname, '../test-image-spectrum-7x7.jpg'))
@@ -14,7 +15,9 @@ export const pngAPIURL = 'http://fake.api/png'
 const testPNGResponse =  readFileSync(resolve(__dirname, '../test-image-picsum-13-750x500.png'))
 
 export const server = setupServer(
-  http.get(testAPIURL, async () => new HttpResponse(testJPGResponse, {
+  http.get(testAPIURL, async () => HttpResponse.json(testAPIResponse)
+  ),
+  http.get(testImageAPIURL, async () => new HttpResponse(testJPGResponse, {
       headers: {
         'Content-Length': testJPGResponse.byteLength.toString(),
         'Content-Type': 'image/jpeg',

@@ -3,17 +3,19 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation'
 
 import styles from './page.module.css';
-import FetchApiOnClient from './utils/fetch-api';
+import { FetchApiOnClient } from './utils/fetch-api';
 
 import LoadingSpinner from './components/loading-spinner';
 import ImageGrid, { ImageGridProps } from './components/image-grid';
 import { PicsumImage } from './components/image-grid';
+import {default as ErrorUI} from '@/app/error';
 
 type APIError = false | string;
 
 const Home = () => {
   const params = useParams();
   const router = useRouter()
+  const [error, setError] = useState<null | Error>(null)
   const [images, setImages] = useState<PicsumImage[]>([]);
   const [dataIsLoading, setDataIsLoading] = useState(true);
   const [hasDataError, setHasDataError] = useState<APIError>(false);
@@ -26,15 +28,23 @@ const Home = () => {
   useEffect(() => {
     setDataIsLoading(true);
     FetchApiOnClient(`https://picsum.photos/v2/list?page=${imagePage}&limit=${APILimit}`)
-      .then(response => {
-        if (response instanceof Error === true) {
-          setHasDataError(response.message);
-        } else {
-          setImages(response);
-        }
-        setDataIsLoading(false);
+      .catch(error => {
+        setError(error as Error)
       })
+      .then(response => {
+        console.log("🚀 ~ Home ~ response instanceof Error === true:", response instanceof Error === true)
+        if (response instanceof Error === true) {
+            setHasDataError(response.message);
+          } else {
+            setImages(response);
+          }
+          setDataIsLoading(false);
+        })
   }, [imagePage]);
+
+  if (error) {
+    return (<ErrorUI error={error} reset={() => { }} />)
+  }
 
   const onNavClick = (event: MouseEvent) => {
     const page = (event.currentTarget as HTMLButtonElement).value;
@@ -65,16 +75,18 @@ const Home = () => {
       <main className={styles.main}>
         <h1 role="heading" aria-level={1}>Picsum API test - Browse Images</h1>
         {
-          dataIsLoading === true ?
-            (<div className={styles.loadingIndicator} role="progressbar">
+          dataIsLoading === true ? (
+            <div className={styles.loadingIndicator} role="progressbar">
               <div role="alert" aria-live="assertive">Loading images</div>
               <LoadingSpinner />
-            </div>)
-          :
-            hasDataError !== false ?
-              (<div role="alert" aria-live="assertive">{hasDataError}</div>)
-            :
-              (<ImageGrid { ...imageGridProps } />)
+            </div>
+          ) : hasDataError !== false ? (
+            <div role="alert" aria-live="assertive">
+              {hasDataError}
+            </div>
+          ) : (
+            <ImageGrid {...imageGridProps} />
+          )
         }
       </main>
     </div>
