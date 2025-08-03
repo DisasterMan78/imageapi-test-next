@@ -10,7 +10,7 @@ import styles from '@/app/id/[image]/page.module.css';
 import CanvasImage  from '@/app/components/canvas-image';
 
 
-export type ImageOptions = {
+type DataPreviewOptions = {
   width: number;
   height: number;
   imageData: string;
@@ -39,7 +39,7 @@ export const editorDefaults = {
 };
 
 const ImageDataPreviewer = () => {
-  let itemStorage: ImageOptions = editorDefaults;
+  let itemStorage: DataPreviewOptions = editorDefaults;
 
   const storageId = 'imageData-preview';
   if (typeof window !== 'undefined') {
@@ -50,7 +50,7 @@ const ImageDataPreviewer = () => {
     }
   }
 
-  const [previewValues, setPreviewValues] = useState<ImageOptions>({
+  const [previewValues, setPreviewValues] = useState<DataPreviewOptions>({
     height: itemStorage.height,
     width: itemStorage.width,
     imageData: itemStorage.imageData

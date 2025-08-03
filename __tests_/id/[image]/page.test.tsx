@@ -3,7 +3,7 @@ import {setupServer} from 'msw/node'
 import '@testing-library/jest-dom'
 import { render, screen, within } from '@testing-library/react'
 
-import ImageEditor, { editorDefaults, LocalStorageImages } from '@/app/id/[image]/page'
+import ImageEditor, { editorDefaults } from '@/app/id/[image]/page'
 import testData from '../../mocks/image-test-data.mock'
 import userEvent from '@testing-library/user-event'
 
@@ -12,6 +12,10 @@ const testApiURL = 'https://picsum.photos/id/0/info'
 interface HTMLCheckboxElement extends HTMLInputElement {
   type: 'checkbox';
 }
+
+type LocalStorageImages = {
+  [key: string]: string;
+};
 
 jest.mock('next/navigation', () => ({
   useParams: () => ({
@@ -210,12 +214,13 @@ describe('Home', () => {
     render(<ImageEditor />)
 
     const container = await screen.findByTestId('edit-options')
-    const label = within(container).getByLabelText('Blur:')
-    const input = within(container).getByDisplayValue('0')
+    const label = within(container).getByText('Blur:')
+    const input = within(container).getByLabelText('Blur:') as HTMLInputElement
+    console.log("🚀 ~ input:", input)
 
     expect(label).toBeInTheDocument()
     expect(input).toBeInTheDocument()
-
+    expect(parseInt(input.value)).toEqual(0)
   })
 
 
@@ -225,7 +230,7 @@ describe('Home', () => {
 
     const container = await screen.findByTestId('edit-image')
     // const imagePreview = within(container).getByAltText('Edited image preview') as HTMLImageElement
-    const input = within(container).getByDisplayValue('0')
+    const input = within(container).getByLabelText('Blur:')
     const button = within(container).getByTestId('get-image-link') as HTMLAnchorElement
     await user.tripleClick(input)
     await userEvent.type(input, '9')
@@ -238,7 +243,7 @@ describe('Home', () => {
     expect(mockLocalStorage.setItem).toHaveBeenCalledTimes(2)
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith('image-id-0', JSON.stringify({
       ...editorDefaults,
-      blur: 9,
+      blurRadius: 9,
     }))
   })
 
@@ -247,7 +252,7 @@ describe('Home', () => {
       width: '567',
       height: '876',
       grayscale: true,
-      blur: '5',
+      blurRadius: '5',
     }
 
     window.localStorage.getItem = () => JSON.stringify(lsValues);
@@ -263,6 +268,6 @@ describe('Home', () => {
     expect(widthInput.value).toEqual(lsValues.width)
     expect(heightInput.value).toEqual(lsValues.height)
     expect(grayscaleInput.checked).toEqual(lsValues.grayscale)
-    expect(blurInput.value).toEqual(lsValues.blur)
+    expect(blurInput.value).toEqual(lsValues.blurRadius)
   })
 })

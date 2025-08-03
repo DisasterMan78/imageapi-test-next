@@ -36,17 +36,15 @@ type EditedSize = {
   height: number;
 };
 
-export type ImageOptions = {
+type ImageOptions = {
   width: number;
   height: number;
   grayscale: boolean;
-  blur: number;
+  blurRadius: number;
   localBlur: number;
 };
 
-export type LocalStorageImages = {
-  [key: string]: string;
-};
+
 
 const thumbnailWidth = 300;
 const thumbnailHeight = 200;
@@ -54,24 +52,25 @@ const imageSizeFactor = 2.5;
 const imageWidth = thumbnailWidth * imageSizeFactor;
 const imageHeight = thumbnailHeight * imageSizeFactor;
 
-export const editorDefaults = {
+export const editorDefaults: ImageOptions = {
   width: imageWidth,
   height: imageHeight,
   grayscale: false,
-  blur: 0,
+  blurRadius: 0,
   localBlur: 1,
 };
+
 
 const getDownloadURL = (
   url: string,
   editedSize: EditedSize,
   grayscale: boolean,
-  blur: number,
+  blurRadius: number,
 ) =>
   url.replace(
     /\d*\/\d*$/,
     `${editedSize.width}/${editedSize.height}?${grayscale ? 'grayscale' : ''}${
-      blur > 0 ? `&blur=${blur}` : ''
+      blurRadius > 0 ? `&blur=${blurRadius}` : ''
     }`
   );
 
@@ -100,11 +99,12 @@ const ImageEditor = () => {
     width: itemStorage.width,
   });
   const [grayscale, setGrayscale] = useState(itemStorage.grayscale);
-  const [blur, setBlur] = useState(itemStorage.blur);
+  const [blurRadius, setBlurRadius] = useState(itemStorage.blurRadius);
   const [convertWithJS, setConvertWithJS] = useState(false);
   const [convertedImage, setConvertedImage] =
     useState<null | ReactElement<HTMLCanvasElement>>(null);
   const [conversionInProgress, setConversionInProgress] = useState(false);
+
   const [localBlur, setLocalBlur] = useState(itemStorage.localBlur);
 
   useEffect(() => {
@@ -129,7 +129,7 @@ const ImageEditor = () => {
       url.replace(
         /\d*\/\d*$/,
         `${thumbnailWidth}/${thumbnailHeight}?${grayscale ? 'grayscale' : ''}${
-          blur > 0 ? `&blur=${blur}` : ''
+          blurRadius > 0 ? `&blur=${blurRadius}` : ''
         }`
       );
 
@@ -169,8 +169,8 @@ const ImageEditor = () => {
         setGrayscale(value as boolean);
         break;
 
-      case 'blur':
-        setBlur(value as number);
+      case 'blurRadius':
+        setBlurRadius(value as number);
         break;
 
       case 'localBlur':
@@ -293,6 +293,8 @@ const ImageEditor = () => {
     return (<ErrorUI error={error} reset={() => { }} />)
   }
 
+  let experimentalImageURL: string;
+
   return (
     <div className={homeStyles.page}>
       <main className={homeStyles.main}>
@@ -355,12 +357,12 @@ const ImageEditor = () => {
                     <input
                       type="number"
                       id="edit-blur"
-                      data-name="blur"
+                      data-name="blurRadius"
                       data-imageid={image?.id}
                       min="0"
                       max="10"
                       step="1"
-                      value={blur}
+                      value={blurRadius}
                       onChange={(e) => onInputChange(e)}
                     />
                   </div>
@@ -381,7 +383,7 @@ const ImageEditor = () => {
                       image?.download_url as string,
                       editedSize,
                       grayscale,
-                      blur
+                      blurRadius
                     )}
                     target="_blank"
                   >
@@ -413,49 +415,33 @@ const ImageEditor = () => {
                 <h3>Experimental:</h3>
                 <p>These functions process image data in pure Javascript in the browser</p>
                 <br />
+                { experimentalImageURL = getDownloadURL(
+                  image?.download_url as string,
+                  editedSize, false, 0
+                )}
                 <button
-                  data-image-url={getDownloadURL(
-                    image?.download_url as string,
-                    editedSize,
-                    grayscale,
-                    blur
-                  )}
+                  data-image-url={experimentalImageURL}
                   data-processing-fn={'original'}
                   onClick={(e) => onJSConvertClick(e)}
                 >
                   Original
                 </button>
                 <button
-                  data-image-url={getDownloadURL(
-                    image?.download_url as string,
-                    editedSize,
-                    grayscale,
-                    blur
-                  )}
+                  data-image-url={experimentalImageURL}
                   data-processing-fn={'invertPixelColour'}
                   onClick={(e) => onJSConvertClick(e)}
                 >
                   Invert
                 </button>
                 <button
-                  data-image-url={getDownloadURL(
-                    image?.download_url as string,
-                    editedSize,
-                    grayscale,
-                    blur
-                      )}
+                  data-image-url={experimentalImageURL}
                   data-processing-fn={'convertToGrayscale'}
                   onClick={(e) => onJSConvertClick(e)}
                 >
                   -&gt; grayscale
                 </button>
                 <button
-                  data-image-url={getDownloadURL(
-                    image?.download_url as string,
-                    editedSize,
-                    grayscale,
-                    blur
-                  )}
+                  data-image-url={experimentalImageURL}
                   data-processing-fn={'basicBlur'}
                   data-blur-radius={1}
                   onClick={(e) => onJSConvertClick(e)}
@@ -463,12 +449,7 @@ const ImageEditor = () => {
                   Blur (1px)
                 </button>
                 <button
-                  data-image-url={getDownloadURL(
-                    image?.download_url as string,
-                    editedSize,
-                    grayscale,
-                    blur
-                  )}
+                  data-image-url={experimentalImageURL}
                   data-processing-fn={'basicBlur'}
                   data-blur-radius={localBlur}
                   onClick={(e) => onJSConvertClick(e)}
@@ -476,28 +457,24 @@ const ImageEditor = () => {
                   Blur ({localBlur}px)
                 </button>
                 <button
-                  data-image-url={getDownloadURL(
-                    image?.download_url as string,
-                    editedSize,
-                    grayscale,
-                    blur
-                  )}
+                  data-image-url={experimentalImageURL}
                   data-processing-fn={'gaussianBlur'}
                   data-blur-radius={localBlur}
                   onClick={(e) => onJSConvertClick(e)}
                 >
                   Gaussian Blur ({localBlur}px)
                 </button>
-                  <input
-                    type="number"
-                    id="localBlur"
-                    data-name="localBlur"
-                    data-imageid={image?.id}
-                    min="1"
-                    step="1"
-                    value={localBlur}
-                    onChange={(e) => onInputChange(e)}
-                  />
+                <input
+                  type="number"
+                  id="localBlur"
+                  data-testid="local-blur-radius"
+                  data-name="localBlur"
+                  data-imageid={image?.id}
+                  min="1"
+                  step="1"
+                  value={localBlur}
+                  onChange={(e) => onInputChange(e)}
+                />
               </div>
               <div>
                 {convertWithJS && convertedImage ? (

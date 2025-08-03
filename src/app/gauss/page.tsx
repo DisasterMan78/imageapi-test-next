@@ -19,13 +19,6 @@ type EditedSize = {
   height: number;
 };
 
-export type ImageOptions = {
-  width: number;
-  height: number;
-  grayscale: boolean;
-  blur: number;
-};
-
 export type LocalStorageImages = {
   [key: string]: string;
 };
