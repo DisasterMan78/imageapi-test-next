@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   ChangeEvent,
   ReactElement,
@@ -6,13 +6,13 @@ import {
   useState,
 } from 'react';
 
-import homeStyles from '../page.module.css';
-import styles from '../id/[image]/page.module.css';
+import homeStyles from '@/app/page.module.css';
+import styles from '@/app/id/[image]/page.module.css';
 
+import CanvasImage  from '@/app/components/canvas-image';
 import {
   gaussianMapImageData,
 } from '@/app/utils/image-processing';
-import CanvasImage  from '../components/canvas-image';
 
 type EditedSize = {
   width: number;

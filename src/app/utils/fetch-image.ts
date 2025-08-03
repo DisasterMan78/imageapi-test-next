@@ -1,6 +1,3 @@
-/* eslint-disable @next/next/no-async-client-component */
-'use client';
-
 const FetchImageOnClient = async (imageURL: string): Promise<Blob | Error> => {
   let data;
   try {

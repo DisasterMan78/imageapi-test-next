@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   ChangeEvent,
   MouseEvent,
@@ -12,7 +12,7 @@ import Image from 'next/image';
 import { decode, RawImageData } from 'jpeg-js';
 
 import homeStyles from '@/app/page.module.css';
-import styles from './page.module.css';
+import styles from '@/app/id/[image]/page.module.css';
 
 import FetchImageOnClient from '@/app/utils/fetch-image';
 import FetchApiOnClient from '@/app/utils/fetch-api';
@@ -109,16 +109,19 @@ const ImageEditor = () => {
 
   useEffect(() => {
     setDataIsLoading(true);
-    FetchApiOnClient(`https://picsum.photos/id/${params.image}/info`).then(
-      (response) => {
-        if (response instanceof Error === true) {
-          setHasDataError(response.message);
-        } else {
-          setImage(response);
-        }
-        setDataIsLoading(false);
-      }
-    );
+    FetchApiOnClient(`https://picsum.photos/id/${params.image}/info`)
+      .catch(error => {
+        setError(error as Error)
+      })
+      .then(
+        (response) => {
+          if (response instanceof Error === true) {
+            setHasDataError(response.message);
+          } else {
+            setImage(response);
+          }
+          setDataIsLoading(false);
+        });
   }, [params.image]);
 
   const Thumbnail = (imageData: PicsumImage) => {
@@ -296,214 +299,216 @@ const ImageEditor = () => {
         <h1 role="heading" aria-level={1}>
           Picsum API test - Edit Image
         </h1>
-        {dataIsLoading === true ? (
-          <div className={homeStyles.loadingIndicator} role="progressbar">
-            <div role="alert" aria-live="assertive">
-              Loading image
+        {
+          dataIsLoading === true ? (
+            <div className={homeStyles.loadingIndicator} role="progressbar">
+              <div role="alert" aria-live="assertive">
+                Loading image
+              </div>
+              <LoadingSpinner />
             </div>
-            <LoadingSpinner />
-          </div>
-        ) : hasDataError !== false ? (
-          <div role="alert" aria-live="assertive">
-            {hasDataError}
-          </div>
-        ) : (
-          <div className={styles.editImage} data-testid="edit-image">
-            <div className={styles.editorUI}>
-              <div className={styles.editOptions} data-testid="edit-options">
-                <div className={styles.editControl}>
-                  <label htmlFor="edit-width">Width:</label>
-                  <input
-                    autoFocus
-                    type="text"
-                    id="edit-width"
-                    data-name="width"
-                    data-imageid={image?.id}
-                    value={editedSize.width}
-                    onChange={(e) => onInputChange(e)}
-                  />
+          ) : hasDataError !== false ? (
+            <div role="alert" aria-live="assertive">
+              {hasDataError}
+            </div>
+          ) : (
+            <div className={styles.editImage} data-testid="edit-image">
+              <div className={styles.editorUI}>
+                <div className={styles.editOptions} data-testid="edit-options">
+                  <div className={styles.editControl}>
+                    <label htmlFor="edit-width">Width:</label>
+                    <input
+                      autoFocus
+                      type="text"
+                      id="edit-width"
+                      data-name="width"
+                      data-imageid={image?.id}
+                      value={editedSize.width}
+                      onChange={(e) => onInputChange(e)}
+                    />
+                  </div>
+                  <div className={styles.editControl}>
+                    <label htmlFor="edit-height">Height:</label>
+                    <input
+                      type="text"
+                      id="edit-height"
+                      data-name="height"
+                      data-imageid={image?.id}
+                      value={editedSize.height}
+                      onChange={(e) => onInputChange(e)}
+                    />
+                  </div>
+                  <div className={styles.editControl}>
+                    <label htmlFor="edit-grayscale">Grayscale:</label>
+                    <input
+                      type="checkbox"
+                      id="edit-grayscale"
+                      data-name="grayscale"
+                      data-imageid={image?.id}
+                      data-testid="edit-grayscale"
+                      checked={grayscale}
+                      onChange={(e) => onInputChange(e)}
+                    />
+                  </div>
+                  <div className={styles.editControl}>
+                    <label htmlFor="edit-blur">Blur:</label>
+                    <input
+                      type="number"
+                      id="edit-blur"
+                      data-name="blur"
+                      data-imageid={image?.id}
+                      min="0"
+                      max="10"
+                      step="1"
+                      value={blur}
+                      onChange={(e) => onInputChange(e)}
+                    />
+                  </div>
                 </div>
-                <div className={styles.editControl}>
-                  <label htmlFor="edit-height">Height:</label>
-                  <input
-                    type="text"
-                    id="edit-height"
-                    data-name="height"
-                    data-imageid={image?.id}
-                    value={editedSize.height}
-                    onChange={(e) => onInputChange(e)}
-                  />
+                <div data-testid="edit-preview">
+                  Image preview:
+                  <div>
+                    <Thumbnail
+                      data-testid="preview-image"
+                      {...(image as PicsumImage)}
+                    />
+                  </div>
                 </div>
-                <div className={styles.editControl}>
-                  <label htmlFor="edit-grayscale">Grayscale:</label>
-                  <input
-                    type="checkbox"
-                    id="edit-grayscale"
-                    data-name="grayscale"
-                    data-imageid={image?.id}
-                    data-testid="edit-grayscale"
-                    checked={grayscale}
-                    onChange={(e) => onInputChange(e)}
-                  />
-                </div>
-                <div className={styles.editControl}>
-                  <label htmlFor="edit-blur">Blur:</label>
-                  <input
-                    type="number"
-                    id="edit-blur"
-                    data-name="blur"
-                    data-imageid={image?.id}
-                    min="0"
-                    max="10"
-                    step="1"
-                    value={blur}
-                    onChange={(e) => onInputChange(e)}
-                  />
-                </div>
-              </div>
-              <div data-testid="edit-preview">
-                Image preview:
                 <div>
-                  <Thumbnail
-                    data-testid="preview-image"
-                    {...(image as PicsumImage)}
-                  />
+                  <Link
+                    data-testid="get-image-link"
+                    href={getDownloadURL(
+                      image?.download_url as string,
+                      editedSize,
+                      grayscale,
+                      blur
+                    )}
+                    target="_blank"
+                  >
+                    <div className="sizeNote">
+                      Changing height and width will affect the visible area of
+                      the downloaded image
+                    </div>
+                    <button>Get edited image in new tab</button>
+                  </Link>
                 </div>
               </div>
-              <div>
-                <Link
-                  data-testid="get-image-link"
-                  href={getDownloadURL(
+              <div className={styles.editedDisplay}>
+                <Image
+                  className={styles.imageOriginal}
+                  data-testid="image-original"
+                  alt={`Image ${image?.id} by ${image?.author}`}
+                  src={image?.download_url as string}
+                  width={imageWidth}
+                  height={imageHeight}
+                />
+                <style jsx>{`
+                  .sizeNote {
+                    width: ${thumbnailWidth}px;
+                    font-size: 1rem;
+                  }
+                `}</style>
+              </div>
+              <div className={styles.experimental}>
+                <h3>Experimental:</h3>
+                <p>These functions process image data in pure Javascript in the browser</p>
+                <br />
+                <button
+                  data-image-url={getDownloadURL(
                     image?.download_url as string,
                     editedSize,
                     grayscale,
                     blur
                   )}
-                  target="_blank"
+                  data-processing-fn={'original'}
+                  onClick={(e) => onJSConvertClick(e)}
                 >
-                  <div className="sizeNote">
-                    Changing height and width will affect the visible area of
-                    the downloaded image
-                  </div>
-                  <button>Get edited image in new tab</button>
-                </Link>
+                  Original
+                </button>
+                <button
+                  data-image-url={getDownloadURL(
+                    image?.download_url as string,
+                    editedSize,
+                    grayscale,
+                    blur
+                  )}
+                  data-processing-fn={'invertPixelColour'}
+                  onClick={(e) => onJSConvertClick(e)}
+                >
+                  Invert
+                </button>
+                <button
+                  data-image-url={getDownloadURL(
+                    image?.download_url as string,
+                    editedSize,
+                    grayscale,
+                    blur
+                      )}
+                  data-processing-fn={'convertToGrayscale'}
+                  onClick={(e) => onJSConvertClick(e)}
+                >
+                  -&gt; grayscale
+                </button>
+                <button
+                  data-image-url={getDownloadURL(
+                    image?.download_url as string,
+                    editedSize,
+                    grayscale,
+                    blur
+                  )}
+                  data-processing-fn={'basicBlur'}
+                  data-blur-radius={1}
+                  onClick={(e) => onJSConvertClick(e)}
+                >
+                  Blur (1px)
+                </button>
+                <button
+                  data-image-url={getDownloadURL(
+                    image?.download_url as string,
+                    editedSize,
+                    grayscale,
+                    blur
+                  )}
+                  data-processing-fn={'basicBlur'}
+                  data-blur-radius={localBlur}
+                  onClick={(e) => onJSConvertClick(e)}
+                >
+                  Blur ({localBlur}px)
+                </button>
+                <button
+                  data-image-url={getDownloadURL(
+                    image?.download_url as string,
+                    editedSize,
+                    grayscale,
+                    blur
+                  )}
+                  data-processing-fn={'gaussianBlur'}
+                  data-blur-radius={localBlur}
+                  onClick={(e) => onJSConvertClick(e)}
+                >
+                  Gaussian Blur ({localBlur}px)
+                </button>
+                  <input
+                    type="number"
+                    id="localBlur"
+                    data-name="localBlur"
+                    data-imageid={image?.id}
+                    min="1"
+                    step="1"
+                    value={localBlur}
+                    onChange={(e) => onInputChange(e)}
+                  />
+              </div>
+              <div>
+                {convertWithJS && convertedImage ? (
+                  <div>{convertedImage}</div>
+                ) : (
+                  <div>{conversionInProgress && <LoadingSpinner />}</div>
+                )}
               </div>
             </div>
-            <div className={styles.editedDisplay}>
-              <Image
-                className={styles.imageOriginal}
-                data-testid="image-original"
-                alt={`Image ${image?.id} by ${image?.author}`}
-                src={image?.download_url as string}
-                width={imageWidth}
-                height={imageHeight}
-              />
-              <style jsx>{`
-                .sizeNote {
-                  width: ${thumbnailWidth}px;
-                  font-size: 1rem;
-                }
-              `}</style>
-            </div>
-            <div className={styles.experimental}>
-              <h3>Experimental:</h3>
-              <p>These functions process image data in pure Javascript in the browser</p>
-              <br />
-              <button
-                data-image-url={getDownloadURL(
-                  image?.download_url as string,
-                  editedSize,
-                  grayscale,
-                  blur
-                )}
-                data-processing-fn={'original'}
-                onClick={(e) => onJSConvertClick(e)}
-              >
-                Original
-              </button>
-              <button
-                data-image-url={getDownloadURL(
-                  image?.download_url as string,
-                  editedSize,
-                  grayscale,
-                  blur
-                )}
-                data-processing-fn={'invertPixelColour'}
-                onClick={(e) => onJSConvertClick(e)}
-              >
-                Invert
-              </button>
-              <button
-                data-image-url={getDownloadURL(
-                  image?.download_url as string,
-                  editedSize,
-                  grayscale,
-                  blur
-                    )}
-                data-processing-fn={'convertToGrayscale'}
-                onClick={(e) => onJSConvertClick(e)}
-              >
-                -&gt; grayscale
-              </button>
-              <button
-                data-image-url={getDownloadURL(
-                  image?.download_url as string,
-                  editedSize,
-                  grayscale,
-                  blur
-                )}
-                data-processing-fn={'basicBlur'}
-                data-blur-radius={1}
-                onClick={(e) => onJSConvertClick(e)}
-              >
-                Blur (1px)
-              </button>
-              <button
-                data-image-url={getDownloadURL(
-                  image?.download_url as string,
-                  editedSize,
-                  grayscale,
-                  blur
-                )}
-                data-processing-fn={'basicBlur'}
-                data-blur-radius={localBlur}
-                onClick={(e) => onJSConvertClick(e)}
-              >
-                Blur ({localBlur}px)
-              </button>
-              <button
-                data-image-url={getDownloadURL(
-                  image?.download_url as string,
-                  editedSize,
-                  grayscale,
-                  blur
-                )}
-                data-processing-fn={'gaussianBlur'}
-                data-blur-radius={localBlur}
-                onClick={(e) => onJSConvertClick(e)}
-              >
-                Gaussian Blur ({localBlur}px)
-              </button>
-                <input
-                  type="number"
-                  id="localBlur"
-                  data-name="localBlur"
-                  data-imageid={image?.id}
-                  min="1"
-                  step="1"
-                  value={localBlur}
-                  onChange={(e) => onInputChange(e)}
-                />
-            </div>
-            <div>
-              {convertWithJS && convertedImage ? (
-                <div>{convertedImage}</div>
-              ) : (
-                <div>{conversionInProgress && <LoadingSpinner />}</div>
-              )}
-            </div>
-          </div>
-        )}
+          )
+        }
       </main>
     </div>
   );

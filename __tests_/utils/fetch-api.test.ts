@@ -1,8 +1,9 @@
 import {http, HttpResponse} from 'msw'
 import '@testing-library/jest-dom'
 
-import FetchApiOnClient from '../../src/app/utils/fetch-api';
+import FetchApiOnClient from '@/app/utils/fetch-api';
 import { waitFor } from '@testing-library/dom';
+
 import { server, testAPIURL, testAPIResponse } from '../mocks/msw.mock';
 
 describe('api fetch tests', () => {

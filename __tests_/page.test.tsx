@@ -4,10 +4,11 @@ import {setupServer} from 'msw/node'
 import '@testing-library/jest-dom'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import mockRouter from 'next-router-mock';
+import mockRouter from 'next-router-mock'
 
-import Home from '../src/app/page'
-import testData from './mocks/image-test-data.mock';
+import Home from '@/app/page'
+
+import testData from './mocks/image-test-data.mock'
 
 const testApiURL = 'https://picsum.photos/v2/list';
 
@@ -58,7 +59,7 @@ describe('Home', () => {
 
     const error = await screen.findByText(/Failed to fetch data/)
 
-    expect(error).toBeInTheDocument();
+    expect(error).toBeInTheDocument()
   })
 
   it('renders image grid', async () => {

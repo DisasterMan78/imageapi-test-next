@@ -90,6 +90,8 @@ describe('Home', () => {
     expect(error).toBeInTheDocument();
   })
 
+  /* TODO: Add test for image API call failure */
+
 
   it('renders original image at 750 * 500px', async () => {
     render(<ImageEditor />)

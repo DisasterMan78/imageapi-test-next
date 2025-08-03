@@ -2,12 +2,13 @@ import '@testing-library/jest-dom'
 // `ImageData` is native to the browser, not available in Jest/js-dom
 import { ImageData } from 'canvas';
 import { render } from '@testing-library/react';
+import { decode, RawImageData } from 'jpeg-js';
 
 import CanvasImage from '@/app/components/canvas-image';
-import { testTinyJPGURL } from '../mocks/msw.mock'
-import { decode, RawImageData } from 'jpeg-js';
 import FetchImageOnClient from '@/app/utils/fetch-image';
 import { getImageDataBuffer } from '@/app/utils/image-processing';
+
+import { testTinyJPGURL } from '../mocks/msw.mock'
 
 let testImageData: Blob
 let testImageDataArray: Uint8Array<ArrayBuffer>

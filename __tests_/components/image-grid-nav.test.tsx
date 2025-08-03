@@ -2,7 +2,8 @@ import '@testing-library/jest-dom'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import ImageGrid from '../../src/app/components/image-grid'
+import ImageGrid from '@/app/components/image-grid'
+
 import testData from '../mocks/image-test-data.mock'
 
 const imageGridProps = {

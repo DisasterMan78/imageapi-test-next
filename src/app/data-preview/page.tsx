@@ -1,13 +1,13 @@
-"use client";
+'use client';
 import {
   ChangeEvent,
   ReactElement,
   useState,
 } from 'react';
 
-import homeStyles from '../page.module.css';
-import styles from '../id/[image]/page.module.css';
-import CanvasImage  from '../components/canvas-image';
+import homeStyles from '@/app/page.module.css';
+import styles from '@/app/id/[image]/page.module.css';
+import CanvasImage  from '@/app/components/canvas-image';
 
 
 export type ImageOptions = {

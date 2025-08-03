@@ -1,6 +1,6 @@
-"use client"
-import styles from './image-grid.module.css';
 import Image from 'next/image'
+
+import styles from '@/app/components/image-grid.module.css';
 
 export type PicsumImage = {
   id: string,
