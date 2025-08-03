@@ -39,23 +39,21 @@ export const editorDefaults = {
 };
 
 const ImageDataPreviewer = () => {
-  let itemStorage = null;
+  let itemStorage: ImageOptions = editorDefaults;
 
   const storageId = 'imageData-preview';
   if (typeof window !== 'undefined') {
-
-    itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
-
-    if (itemStorage == null) {
+    if (itemStorage !== null) {
+      itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
+    } else {
       localStorage.setItem(storageId, JSON.stringify(editorDefaults));
-      itemStorage = editorDefaults;
     }
   }
-  const editorInitialValues: ImageOptions = itemStorage;
+
   const [previewValues, setPreviewValues] = useState<ImageOptions>({
-    height: editorInitialValues.height,
-    width: editorInitialValues.width,
-    imageData: editorInitialValues.imageData
+    height: itemStorage.height,
+    width: itemStorage.width,
+    imageData: itemStorage.imageData
   });
   const [previewImage, setPreviewImage] = useState<null | ReactElement<HTMLCanvasElement>>(null);
 

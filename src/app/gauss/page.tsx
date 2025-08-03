@@ -39,22 +39,20 @@ export const editorDefaults = {
 };
 
 const GaussianImageMap = () => {
-  let itemStorage = null;
+  let itemStorage: EditedSize = editorDefaults;
 
   const storageId = 'gauss';
   if (typeof window !== 'undefined') {
-
-    itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
-
-    if (itemStorage == null) {
+    if (itemStorage !== null) {
+      itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
+    } else {
       localStorage.setItem(storageId, JSON.stringify(editorDefaults));
-      itemStorage = editorDefaults;
     }
   }
-  const editorInitialValues: ImageOptions = itemStorage;
+
   const [editedSize, setEditedSize] = useState<EditedSize>({
-    height: editorInitialValues.height,
-    width: editorInitialValues.width,
+    height: itemStorage.height,
+    width: itemStorage.width,
   });
   const [gaussianMapImage, setGaussianMapImage] = useState<null | ReactElement<HTMLCanvasElement>>(null);
 
