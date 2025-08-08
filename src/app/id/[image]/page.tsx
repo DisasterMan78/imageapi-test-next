@@ -30,7 +30,6 @@ import { PicsumImage } from '@/app/components/image-grid';
 import CanvasImage from '@/app/components/canvas-image';
 import {default as ErrorUI} from '@/app/error';
 
-type APIError = false | string;
 type EditedSize = {
   width: number;
   height: number;
@@ -93,7 +92,6 @@ const ImageEditor = () => {
   const [error, setError] = useState<null | Error>(null)
   const [image, setImage] = useState<PicsumImage>();
   const [dataIsLoading, setDataIsLoading] = useState(true);
-  const [hasDataError, setHasDataError] = useState<APIError>(false);
   const [editedSize, setEditedSize] = useState<EditedSize>({
     height: itemStorage.height,
     width: itemStorage.width,
@@ -115,11 +113,7 @@ const ImageEditor = () => {
       })
       .then(
         (response) => {
-          if (response instanceof Error === true) {
-            setHasDataError(response.message);
-          } else {
-            setImage(response);
-          }
+          setImage(response);
           setDataIsLoading(false);
         });
   }, [params.image]);
@@ -308,10 +302,6 @@ const ImageEditor = () => {
                 Loading image
               </div>
               <LoadingSpinner />
-            </div>
-          ) : hasDataError !== false ? (
-            <div role="alert" aria-live="assertive">
-              {hasDataError}
             </div>
           ) : (
             <div className={styles.editImage} data-testid="edit-image">

@@ -10,15 +10,12 @@ import ImageGrid, { ImageGridProps } from '@/app/components/image-grid';
 import { PicsumImage } from '@/app/components/image-grid';
 import {default as ErrorUI} from '@/app/error';
 
-type APIError = false | string;
-
 const Home = () => {
   const params = useParams();
   const router = useRouter()
   const [error, setError] = useState<null | Error>(null)
   const [images, setImages] = useState<PicsumImage[]>([]);
   const [dataIsLoading, setDataIsLoading] = useState(true);
-  const [hasDataError, setHasDataError] = useState<APIError>(false);
   const [imagePage, setImagePage] = useState(parseInt(params.page as string) || 1);
 
   const thumbnailWidth = 300;
@@ -33,13 +30,9 @@ const Home = () => {
       })
       .then(response => {
         console.log("🚀 ~ Home ~ response instanceof Error === true:", response instanceof Error === true)
-        if (response instanceof Error === true) {
-            setHasDataError(response.message);
-          } else {
-            setImages(response);
-          }
-          setDataIsLoading(false);
-        })
+        setImages(response);
+        setDataIsLoading(false);
+      })
   }, [imagePage]);
 
   if (error) {
@@ -79,10 +72,6 @@ const Home = () => {
             <div className={styles.loadingIndicator} role="progressbar">
               <div role="alert" aria-live="assertive">Loading images</div>
               <LoadingSpinner />
-            </div>
-          ) : hasDataError !== false ? (
-            <div role="alert" aria-live="assertive">
-              {hasDataError}
             </div>
           ) : (
             <ImageGrid {...imageGridProps} />
