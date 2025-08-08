@@ -71,12 +71,12 @@ describe('Home', () => {
   })
 
 
-  it('shows loading before image data received', () => {
+  it('shows loading before image data received', async () => {
     render(<ImageEditor />)
 
-    const loading = screen.getAllByRole('progressbar')[0]
+    const loading = await screen.findByRole('progressbar', { name: /Loading image/ })
 
-    expect(loading).toHaveTextContent('Loading image')
+    expect(loading).toBeInTheDocument()
   })
 
 
@@ -269,5 +269,29 @@ describe('Home', () => {
     expect(heightInput.value).toEqual(lsValues.height)
     expect(grayscaleInput.checked).toEqual(lsValues.grayscale)
     expect(blurInput.value).toEqual(lsValues.blurRadius)
+  })
+
+  it('shows a loading indicator while doing experimental conversions', async () => {
+    const user = userEvent.setup()
+
+    render(<ImageEditor />)
+
+    /* TODO: Mock call to https://picsum.photos/id/0/750/500? */
+    /* Useful when API calls are very fast */
+    /* Using this breaks later function calls so */
+    /* those will need to be mocked for this test */
+    // server.use(
+    //   http.get('https://picsum.photos/id/0/750/500?', async () => await delay('infinite')
+    // ))
+
+    const container = await screen.findByTestId('edit-image')
+    const button = within(container).getByRole('button', { name: /Original/})
+
+    await user.click(button)
+
+    const loading = await screen.findByRole('progressbar', {name: /Loading converted image/})
+
+    expect(loading).toBeInTheDocument()
+
   })
 })

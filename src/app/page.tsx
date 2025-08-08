@@ -69,9 +69,13 @@ const Home = () => {
         <h1 role="heading" aria-level={1}>Picsum API test - Browse Images</h1>
         {
           dataIsLoading === true ? (
-            <div className={styles.loadingIndicator} role="progressbar">
-              <div role="alert" aria-live="assertive">Loading images</div>
-              <LoadingSpinner />
+            <div>
+              <label id='loading-label' htmlFor='loading-indicator' role="alert" aria-live="assertive">
+                Loading images
+              </label>
+              <div id='loading-indicator' className={styles.loadingIndicator} role="progressbar" aria-labelledby='loading-label'>
+                <LoadingSpinner />
+              </div>
             </div>
           ) : (
             <ImageGrid {...imageGridProps} />

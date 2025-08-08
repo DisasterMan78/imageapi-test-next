@@ -111,11 +111,10 @@ const ImageEditor = () => {
       .catch(error => {
         setError(error as Error)
       })
-      .then(
-        (response) => {
-          setImage(response);
-          setDataIsLoading(false);
-        });
+      .then(response => {
+        setImage(response);
+        setDataIsLoading(false);
+      });
   }, [params.image]);
 
   const Thumbnail = (imageData: PicsumImage) => {
@@ -297,11 +296,13 @@ const ImageEditor = () => {
         </h1>
         {
           dataIsLoading === true ? (
-            <div className={homeStyles.loadingIndicator} role="progressbar">
-              <div role="alert" aria-live="assertive">
+            <div>
+              <label id='loading-label' htmlFor='loading-indicator' role="alert" aria-live="assertive">
                 Loading image
+              </label>
+              <div id='loading-indicator' className={homeStyles.loadingIndicator} role="progressbar" aria-labelledby='loading-label'>
+                <LoadingSpinner />
               </div>
-              <LoadingSpinner />
             </div>
           ) : (
             <div className={styles.editImage} data-testid="edit-image">
@@ -470,7 +471,16 @@ const ImageEditor = () => {
                 {convertWithJS && convertedImage ? (
                   <div>{convertedImage}</div>
                 ) : (
-                  <div>{conversionInProgress && <LoadingSpinner />}</div>
+                  <div>{conversionInProgress && (
+                    <div>
+                      <label id='conversion-loading-label' htmlFor='conversion-loading-indicator' role="alert" aria-live="assertive">
+                        Loading converted image
+                      </label>
+                      <div id='conversion-loading-indicator' className={homeStyles.loadingIndicator} role="progressbar" aria-labelledby='conversion-loading-label'>
+                        <LoadingSpinner />
+                      </div>
+                    </div>
+                  )}</div>
                 )}
               </div>
             </div>

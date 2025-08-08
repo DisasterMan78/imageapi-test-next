@@ -40,12 +40,12 @@ describe('Home', () => {
     expect(heading).toHaveTextContent('Picsum API test - Browse Images')
   })
 
-  it('shows loading before image data received', () => {
+  it('shows loading before image data received', async () => {
     render(<Home />)
 
-    const loading = screen.getAllByRole('progressbar')[0]
+    const loading = await screen.findByRole('progressbar', { name: /Loading image/ })
 
-    expect(loading).toHaveTextContent('Loading images')
+    expect(loading).toBeInTheDocument()
   })
 
   it('displays an error if API call fails', async () => {
