@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom'
-import { waitFor } from '@testing-library/dom'
+
 import { decode, RawImageData } from 'jpeg-js'
 
 import FetchImageOnClient from '@/app/utils/fetch-image'
@@ -35,9 +35,7 @@ describe('Image processing tests', () => {
 
 
   it('can check that binary data has JPEG signature markers (true)', async () => {
-    await waitFor(() => {
-      expect(checkImageDataIsJPEG(testImageDataArray)).toBeTruthy()
-    })
+    expect(checkImageDataIsJPEG(testImageDataArray)).toBeTruthy()
   })
 
 
@@ -45,9 +43,7 @@ describe('Image processing tests', () => {
     const pngImageData = await FetchImageOnClient(pngAPIURL) as Blob
     const imageDataArray = await getImageDataBuffer(pngImageData)
 
-    await waitFor(() => {
-      expect(checkImageDataIsJPEG(imageDataArray)).toBeFalsy()
-    })
+    expect(checkImageDataIsJPEG(imageDataArray)).toBeFalsy()
   })
 
 

@@ -2,7 +2,6 @@ import {http, HttpResponse} from 'msw'
 import '@testing-library/jest-dom'
 
 import FetchApiOnClient from '@/app/utils/fetch-api';
-import { waitFor } from '@testing-library/dom';
 
 import { server, testAPIURL, testAPIResponse } from '../mocks/msw.mock';
 
@@ -10,9 +9,7 @@ describe('api fetch tests', () => {
   it('receives data from API on success', async () => {
     const result = await FetchApiOnClient(testAPIURL)
 
-    await waitFor(
-      () => expect(result).toMatch(testAPIResponse)
-    )
+    expect(result).toMatch(testAPIResponse)
   })
 
   it('handles server error', async () => {

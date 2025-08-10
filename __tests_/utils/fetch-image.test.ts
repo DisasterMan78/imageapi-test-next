@@ -2,7 +2,6 @@ import { http, HttpResponse } from 'msw'
 import '@testing-library/jest-dom'
 
 import FetchImageOnClient from '@/app/utils/fetch-image'
-import { waitFor } from '@testing-library/dom'
 import { server, testImageAPIURL, testJPGResponse } from '../mocks/msw.mock'
 
 describe('api fetch tests', () => {
@@ -10,9 +9,7 @@ describe('api fetch tests', () => {
     const result = await FetchImageOnClient(testImageAPIURL)
     const testBlob = new Blob([new Uint8Array(testJPGResponse)], {type: 'image/jpeg' });
 
-    await waitFor(
-      () => expect(result).toMatchObject(testBlob)
-    )
+    expect(result).toMatchObject(testBlob)
   })
 
   it('handles server error', async () => {
