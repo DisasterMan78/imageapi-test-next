@@ -80,7 +80,7 @@ describe('Home', () => {
   })
 
 
-  it('displays an error if API call fails', async () => {
+  it('displays an error if the API call fails', async () => {
     server.use(
       http.get(testApiURL, () => {
         return new HttpResponse(null, {status: 500})
@@ -216,7 +216,6 @@ describe('Home', () => {
     const container = await screen.findByTestId('edit-options')
     const label = within(container).getByText('Blur:')
     const input = within(container).getByLabelText('Blur:') as HTMLInputElement
-    console.log("🚀 ~ input:", input)
 
     expect(label).toBeInTheDocument()
     expect(input).toBeInTheDocument()
@@ -276,10 +275,8 @@ describe('Home', () => {
 
     render(<ImageEditor />)
 
-    /* TODO: Mock call to https://picsum.photos/id/0/750/500? */
     /* Useful when API calls are very fast */
-    /* Using this breaks later function calls so */
-    /* those will need to be mocked for this test */
+    /* Using this breaks later function calls as no image data is returned */
     // server.use(
     //   http.get('https://picsum.photos/id/0/750/500?', async () => await delay('infinite')
     // ))

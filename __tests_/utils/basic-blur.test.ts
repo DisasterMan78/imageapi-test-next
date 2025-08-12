@@ -13,7 +13,7 @@ beforeEach(async () => {
   testImageData = await FetchImageOnClient(testTinyJPGURL) as Blob
   testImageDataArray = await getImageDataBuffer(testImageData)
   rawImageData = decode(testImageDataArray)
-  console.log("🚀 ~ rawImageData:", rawImageData)
+  // console.log("🚀 ~ rawImageData:", rawImageData)
 })
 
 describe('basic blur tests', () => {

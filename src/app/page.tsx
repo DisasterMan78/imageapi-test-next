@@ -29,7 +29,6 @@ const Home = () => {
         setError(error as Error)
       })
       .then(response => {
-        console.log("🚀 ~ Home ~ response instanceof Error === true:", response instanceof Error === true)
         setImages(response);
         setDataIsLoading(false);
       })
