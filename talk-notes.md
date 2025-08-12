@@ -25,3 +25,6 @@ https://computergraphics.stackexchange.com/questions/39/how-is-gaussian-blur-imp
 Accidental motion blur: commit 834e227a15e5cca12504ee83330fa702b913ec6f
 
 
+## Why these skills might be useful in the front end
+To do shit like this:
+https://codepen.io/thecubiq/pen/ZYbQmZN
