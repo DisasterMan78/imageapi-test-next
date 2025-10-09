@@ -2,12 +2,14 @@
 import {
   ChangeEvent,
   ReactElement,
+  useEffect,
   useState,
 } from 'react';
 
 import homeStyles from '@/app/page.module.css';
 import styles from '@/app/id/[image]/page.module.css';
 import CanvasImage  from '@/app/components/canvas-image';
+import LoadingSpinner from '../components/loading-spinner';
 
 
 type DataPreviewOptions = {
@@ -26,36 +28,51 @@ const imageSizeFactor = 2.5;
 const imageWidth = thumbnailWidth * imageSizeFactor;
 const imageHeight = thumbnailHeight * imageSizeFactor;
 
-const sampleData = `[
-  223,  32,  64, 255, 234,  85,  43, 255, 255, 127,   0, 255,
-  170,  21, 127, 255, 198,  56,  85, 255, 234,  85,  43, 255,
-  128,   0, 191, 255, 170,  21, 127, 255, 223,  32,  64, 255
-]`;
+const sampleData = [
+  223,  32,  64, 255,
+  234,  85,  43, 255,
+  255, 127,   0, 255,
+  170,  21, 127, 255,
+  198,  56,  85, 255,
+  234,  85,  43, 255,
+  128,   0, 191, 255,
+  170,  21, 127, 255,
+  223,  32,  64, 255
+];
 
 export const editorDefaults = {
   width: imageWidth,
   height: imageHeight,
-  imageData: sampleData.replace(/\n/g, ''),
+  imageData: JSON.stringify(sampleData),
 };
+
+const formatImageData = (imageDataString: string) => {
+  let formattedData = imageDataString.replace(/(([^,]*,){4})/g, '$1\n');
+  formattedData = formattedData.replace(/(\d{3})(?=[\D])/g, ' $1')
+  formattedData = formattedData.replace(/([\D])(\d{2})(?=[\D])/g, '$1  $2')
+  formattedData = formattedData.replace(/([\D])(\d)(?=[\D])/g, '$1   $2')
+  formattedData = formattedData.replace(/\[/g, '[\n')
+  formattedData = formattedData.replace(/]/g, '\n]')
+  return formattedData;
+}
 
 const ImageDataPreviewer = () => {
   let itemStorage: DataPreviewOptions = editorDefaults;
 
   const storageId = 'imageData-preview';
-  if (typeof window !== 'undefined') {
-    if (itemStorage !== null) {
+  useEffect(() => {
+    if (localStorage.getItem(storageId)) {
       itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
     } else {
+      itemStorage = editorDefaults;
       localStorage.setItem(storageId, JSON.stringify(editorDefaults));
     }
-  }
+  }, []);
 
-  const [previewValues, setPreviewValues] = useState<DataPreviewOptions>({
-    height: itemStorage.height,
-    width: itemStorage.width,
-    imageData: itemStorage.imageData
-  });
+  console.log('itemStorage', itemStorage)
+  const [previewValues, setPreviewValues] = useState<DataPreviewOptions>(itemStorage);
   const [previewImage, setPreviewImage] = useState<null | ReactElement<HTMLCanvasElement>>(null);
+  const [previewButtonIsDisabled, setPreviewButtonIsDisabled] = useState<boolean>(false);
 
   const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputName = e.currentTarget.getAttribute('data-name');
@@ -81,32 +98,35 @@ const ImageDataPreviewer = () => {
       default:
         break;
     }
-    if (typeof window !== 'undefined') {
-      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
 
-      itemStorage[inputName as string] = value;
-      localStorage.setItem(storageId, JSON.stringify(itemStorage));
-    }
+    const itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
+
+    itemStorage[inputName as string] = value;
+    localStorage.setItem(storageId, JSON.stringify(itemStorage));
   };
 
   const onPixeldataChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.currentTarget.value;
+    const sanitisedValue = sanitisePixelDataString(value);
 
+    setPreviewButtonIsDisabled(isPreviewDisabled(sanitisedValue));
     setPreviewValues({
       height: previewValues.height,
       width: previewValues.width,
-      imageData: value,
+      imageData: sanitisedValue,
     });
 
-    if (typeof window !== 'undefined') {
-      const itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
+    const itemStorage = JSON.parse(localStorage.getItem(storageId) as string);
 
-      itemStorage['imageData'] = value.replace("\n", '');
-      localStorage.setItem(storageId, JSON.stringify(itemStorage));
-    }
+    itemStorage.imageData = sanitisedValue.replace("\n", '');
+    localStorage.setItem(storageId, JSON.stringify(itemStorage));
   }
 
-  const createImagePreview = () => {
+  // TODO: Remove non numeric values
+  // TODO: Flag unparseable array
+  const sanitisePixelDataString = (data: string): string => data.replace(/,[\s\n]*]?$/, ']');
+
+  const createImagePreview = (previewValues: DataPreviewOptions) => {
     console.log("🚀 ~ createImagePreview ~ previewValues:", previewValues)
     const imageDataArray = new Uint8ClampedArray(JSON.parse(previewValues.imageData));
     console.log("🚀 ~ createImagePreview ~ imageDataArray:", imageDataArray)
@@ -124,12 +144,19 @@ const ImageDataPreviewer = () => {
     setPreviewImage(newCanvasImage);
   }
 
+  const isPreviewDisabled = (previewData: string): boolean => {
+    // TODO: Disable if data length isn't divisible into width*4
+    console.log('previewData: ', previewData)
+    return JSON.parse(previewData).length % 4 != 0
+  }
+
   return (
     <div className={homeStyles.page}>
-      <main className={homeStyles.main}>
-        <h1 role="heading" aria-level={1}>
-          Preview image data
-        </h1>
+      {itemStorage ? (
+        <main className={homeStyles.main}>
+          <h1 role="heading" aria-level={1}>
+            Preview image data
+          </h1>
           <div className={styles.editImage} data-testid="edit-image">
             <div className={styles.editorUI}>
               <div className={styles.editOptions} data-testid="edit-options">
@@ -146,6 +173,9 @@ const ImageDataPreviewer = () => {
                     onChange={(e) => onInputChange(e)}
                   />
                 </div>
+                {
+                  // TODO: Remove height input - we'll work it out from the data
+                }
                 <div className={styles.editControl}>
                   <label htmlFor="edit-height">Height:</label>
                   <input
@@ -159,19 +189,24 @@ const ImageDataPreviewer = () => {
                   />
                 </div>
                 <div className={styles.editControl}>
-                  <label htmlFor="edit-height">RGBA pixel data array:</label>
-                <textarea
-                    rows={10}
-                    cols={100}
+                  <label htmlFor="edit-height">RGBA pixel data array:</label><br />
+                  <textarea
+                    rows={11}
+                    cols={21}
                     id="edit-pixeldata"
                     data-name="pixeldata"
                     onChange={(e) => onPixeldataChange(e)}
-                    value={previewValues.imageData}
-                />
-              </div>
-              <div>
-                Sample data:
-                <code><pre>{sampleData}</pre></code>
+                    defaultValue={formatImageData(JSON.stringify(previewValues.imageData).replace(/"/g, ''))}
+                  />
+                </div>
+                <div>
+                  Sample data:<br />
+                  <code>
+                    <pre>
+                      &nbsp; R &nbsp;&nbsp; G &nbsp;&nbsp; B &nbsp;&nbsp; A<br />
+                      {formatImageData(JSON.stringify(sampleData))}
+                    </pre>
+                  </code>
                 </div>
               </div>
             </div>
@@ -181,10 +216,19 @@ const ImageDataPreviewer = () => {
               )}
             </div>
             <div>
-              <button onClick={() => createImagePreview()}>Generate preview image</button>
+              <button
+                onClick={() => createImagePreview(previewValues)}
+                disabled={previewButtonIsDisabled}
+                title={JSON.parse(previewValues.imageData).length % 4 === 0 ? "Generate preview image" : "Data length must be divisible by 4 (RGBA)"}
+              >
+                Generate preview image
+              </button>
             </div>
           </div>
-      </main>
+        </main>
+      ) : (
+          LoadingSpinner()
+      )}
     </div>
   );
 };
