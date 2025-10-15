@@ -6,13 +6,13 @@ import { resolve } from 'path';
 export const testAPIURL = 'http://fake.api/test'
 export const testImageAPIURL = 'http://fake.api/image'
 export const testAPIResponse = JSON.stringify({ someKey: 'Some string data' })
-export const testJPGResponse = readFileSync(resolve(__dirname, '../test-image-picsum-13-750x500.jpg'))
+export const testJPGResponse = Buffer.from(readFileSync(resolve(__dirname, '../test-image-picsum-13-750x500.jpg')))
 export const testSmallJPGURL = 'http://fake.api/smalltiny-jpg'
-const testSmallJPGResponse =  readFileSync(resolve(__dirname, '../test-image-spectrum-7x7.jpg'))
+const testSmallJPGResponse =  Buffer.from(readFileSync(resolve(__dirname, '../test-image-spectrum-7x7.jpg')))
 export const testTinyJPGURL = 'http://fake.api/tiny-jpg'
-const testTinyJPGResponse =  readFileSync(resolve(__dirname, '../test-image-spectrum-3x3.jpg'))
+const testTinyJPGResponse =  Buffer.from(readFileSync(resolve(__dirname, '../test-image-spectrum-3x3.jpg')))
 export const pngAPIURL = 'http://fake.api/png'
-const testPNGResponse =  readFileSync(resolve(__dirname, '../test-image-picsum-13-750x500.png'))
+const testPNGResponse =  Buffer.from(readFileSync(resolve(__dirname, '../test-image-picsum-13-750x500.png')))
 
 export const server = setupServer(
   http.get(testAPIURL, async () => HttpResponse.json(testAPIResponse)
