@@ -1,23 +1,18 @@
 import '@testing-library/jest-dom'
 // `ImageData` is native to the browser, not available in Jest/js-dom
-import { ImageData } from 'canvas';
-import { render } from '@testing-library/react';
-import { decode, RawImageData } from 'jpeg-js';
+import { ImageData } from 'canvas'
+import { render } from '@testing-library/react'
+import { RawImageData } from 'jpeg-js'
 
-import CanvasImage from '@/app/components/canvas-image';
-import FetchImageOnClient from '@/app/utils/fetch-image';
-import { getImageDataBuffer } from '@/app/utils/image-processing';
+import CanvasImage from '@/app/components/canvas-image'
+import { fetchAndDecodeToImageData } from '@/app/utils/image-processing'
 
 import { testTinyJPGURL } from '../mocks/msw.mock'
 
-let testImageData: Blob
-let testImageDataArray: Uint8Array<ArrayBuffer>
 let rawImageData: RawImageData<Buffer>
 
 beforeEach(async () => {
-  testImageData = await FetchImageOnClient(testTinyJPGURL) as Blob
-  testImageDataArray = await getImageDataBuffer(testImageData)
-  rawImageData = decode(testImageDataArray)
+  rawImageData = await fetchAndDecodeToImageData(testTinyJPGURL) as RawImageData<Buffer>
 })
 
 describe('api fetch tests', () => {
@@ -26,7 +21,7 @@ describe('api fetch tests', () => {
     const { width, height } = rawImageData;
     const NewCanvasImage = (
       <CanvasImage
-        // Intellisense complains about `new ImageData()` not neing a
+        // Intellisense complains about `new ImageData()` not being a
         // perfect match because we are using the version from the
         // `canvas` package, but works fine for tests
         imageData={

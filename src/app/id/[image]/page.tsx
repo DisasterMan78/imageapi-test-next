@@ -9,16 +9,15 @@ import {
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import { decode, RawImageData } from 'jpeg-js';
+import { RawImageData } from 'jpeg-js';
 
 import homeStyles from '@/app/page.module.css';
 import styles from '@/app/id/[image]/page.module.css';
 
-import FetchImageOnClient from '@/app/utils/fetch-image';
 import FetchApiOnClient from '@/app/utils/fetch-api';
 import {
   convertImageDataToGrayscale,
-  getImageDataBuffer,
+  fetchAndDecodeToImageData,
   invertImageData,
   originalData,
 } from '@/app/utils/image-processing';
@@ -192,14 +191,14 @@ const ImageEditor = () => {
     const url = clickedButton.getAttribute('data-image-url') as string;
     const functionName = clickedButton.getAttribute('data-processing-fn');
 
-    const imageData = await FetchImageOnClient(url)
-      .catch(error => {
-        setError(error as Error)
-      });
+    // const imageData = await FetchImageOnClient(url)
+    //   .catch(error => {
+    //     setError(error as Error)
+    //   });
 
-    const imageDataBuffer = (await getImageDataBuffer(
-      imageData as Blob
-    )) as Uint8Array<ArrayBuffer>;
+    // const imageDataBuffer = (await getImageDataBuffer(
+    //   imageData as Blob
+    // )) as Uint8Array<ArrayBuffer>;
 
     // const SOSIndex = locateSOSinImage(imageDataBuffer);
     // const EOS = imageDataBuffer.length - 2;
@@ -222,7 +221,7 @@ const ImageEditor = () => {
     Everything up to this point has been a total waste of time for my goals,
     but it has been highly educational. And irrelevant. But educational.
     */
-    const rawImageData = decode(imageDataBuffer) as RawImageData<Buffer>;
+    // const rawImageData = decode(imageDataBuffer) as RawImageData<Buffer>;
 
     /*
     I started attempting to write PNG data from scratch. It is quite
@@ -237,6 +236,11 @@ const ImageEditor = () => {
     /* buffer size is incorrect - doesn't allow for all the PNG header data */
     // const PNGBuffer = new ArrayBuffer(4 * rawImageData.width * rawImageData.height);
     // const PNGUint8CData = new Uint8ClampedArray(PNGBuffer)
+
+    const rawImageData = await fetchAndDecodeToImageData(url)
+      .catch(error => {
+        setError(error)
+      }) as RawImageData<Buffer>;
 
     let processedData: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(new ArrayBuffer(
       4 * rawImageData.width * rawImageData.height

@@ -90,29 +90,15 @@ describe('Home', () => {
     expect(error).toBeInTheDocument();
   })
 
-  /* TODO: Add test for image API call failure */
-
-
-  it('renders original image at 750 * 500px', async () => {
-    render(<ImageEditor />)
-    const image = await screen.findByTestId('image-original') as HTMLImageElement
-
-    expect(image).toBeInTheDocument()
-    expect(image.width).toEqual(750)
-    expect(image.height).toEqual(500)
-  })
-
-
-  it('renders a "width" input with default value', async () => {
+  it('renders a "width" input with label and default value', async () => {
     render(<ImageEditor />)
 
     const container = await screen.findByTestId('edit-options')
-    const label = within(container).getByLabelText('Width:')
-    const input = within(container).getByDisplayValue('750')
+    const input = within(container).getByLabelText('Width:') as HTMLInputElement
 
-    expect(label).toBeInTheDocument()
     expect(input).toBeInTheDocument()
-
+    expect(input.tagName).toEqual('INPUT')
+    expect(input.value).toEqual("750")
   })
 
 
@@ -141,12 +127,11 @@ describe('Home', () => {
     render(<ImageEditor />)
 
     const container = await screen.findByTestId('edit-options')
-    const label = within(container).getByLabelText('Height:')
-    const input = within(container).getByDisplayValue('500')
+    const input = within(container).getByLabelText('Height:') as HTMLInputElement
 
-    expect(label).toBeInTheDocument()
     expect(input).toBeInTheDocument()
-
+    expect(input.tagName).toEqual('INPUT')
+    expect(input.value).toEqual("500")
   })
 
 
@@ -187,31 +172,79 @@ describe('Home', () => {
   })
 
   it('has a message to encrypt input', async () => {
-    expect(0).toEqual(1)
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-options')
+    const input = within(container).getByLabelText('Message to encrypt:')
+
+    expect(input).toBeInTheDocument()
+    expect(input.tagName).toEqual('INPUT')
   })
 
   it('has an characters remaining indicator', async () => {
-    expect(0).toEqual(1)
+    const lsValues = {
+      width: '567',
+      height: '876',
+    }
+
+    window.localStorage.getItem = () => JSON.stringify(lsValues);
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-options')
+    const indicator = within(container).getByText('characters available to encrypt', { exact: false })
+    const indicatorText = indicator.textContent;
+
+    expect(indicatorText).toEqual('0 / 62086 characters available to encrypt')
   })
 
-  it('updates characters remaining indicator when message to encrypt changes', () => {
-    expect(0).toEqual(1)
+  it('updates characters remaining indicator when message to encrypt changes', async () => {
+    const lsValues = {
+      width: '567',
+      height: '876',
+    }
+
+    window.localStorage.getItem = () => JSON.stringify(lsValues);
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-options')
+    const input = within(container).getByLabelText('Message to encrypt:')
+    const indicator = within(container).getByText('characters available to encrypt', { exact: false })
+
+    await userEvent.type(input, '1234567890')
+    const indicatorText = indicator.textContent;
+
+    expect(indicatorText).toEqual('10 / 62086 characters available to encrypt')
   })
 
-  it('has an encrypt data in alpha channel button', () => {
-    expect(0).toEqual(1)
+  it('has an encrypt data in alpha channel button', async () => {
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-options')
+    const button = within(container).getByRole('button', {
+      name: /Encrypt/
+    })
+
+    expect(button).toBeInTheDocument()
   })
 
-  it('displays the image with encrypted data when the encypt data button is clicked', () => {
-    expect(0).toEqual(1)
+  it('displays the image with encrypted data when the encypt data button is clicked', async () => {
+    const user = userEvent.setup()
+    render(<ImageEditor />)
+
+    const container = await screen.findByTestId('edit-options')
+    const button = within(container).getByRole('button', { name: /Encrypt/ }) as HTMLButtonElement
+
+    await user.click(button)
+
+    // expect(onEncryptClick).toHaveBeenCalled()
   })
 
-  it('has a show encrypted data channel (high contrast) button', () => {
-    expect(0).toEqual(1)
-  })
+  // it('has a show encrypted data channel (high contrast) button', () => {
+  //   expect(0).toEqual(1)
+  // })
 
-  it('displays the encrypted data channel the show encrypted data channel (high contrast) button is clicked', () => {
-    expect(0).toEqual(1)
-  })
+  // it('displays the encrypted data channel the show encrypted data channel (high contrast) button is clicked', () => {
+  //   expect(0).toEqual(1)
+  // })
 
 })

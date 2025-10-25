@@ -7,12 +7,16 @@ export const testAPIURL = 'http://fake.api/test'
 export const testImageAPIURL = 'http://fake.api/image'
 export const testAPIResponse = JSON.stringify({ someKey: 'Some string data' })
 export const testJPGResponse = Buffer.from(readFileSync(resolve(__dirname, '../test-image-picsum-13-750x500.jpg')))
-export const testSmallJPGURL = 'http://fake.api/smalltiny-jpg'
+export const testMedJPGURL = 'http://fake.api/med-jpg'
+const testMedJPGResponse =  Buffer.from(readFileSync(resolve(__dirname, '../test-image-spectrum-28x28.jpg')))
+export const testSmallJPGURL = 'http://fake.api/small-jpg'
 const testSmallJPGResponse =  Buffer.from(readFileSync(resolve(__dirname, '../test-image-spectrum-7x7.jpg')))
 export const testTinyJPGURL = 'http://fake.api/tiny-jpg'
 const testTinyJPGResponse =  Buffer.from(readFileSync(resolve(__dirname, '../test-image-spectrum-3x3.jpg')))
 export const pngAPIURL = 'http://fake.api/png'
-const testPNGResponse =  Buffer.from(readFileSync(resolve(__dirname, '../test-image-picsum-13-750x500.png')))
+const testPNGResponse = Buffer.from(readFileSync(resolve(__dirname, '../test-image-picsum-13-750x500.png')))
+export const pngAlphaAPIURL = 'http://fake.api/pngalpha'
+const testPNGAlphaResponse =  Buffer.from(readFileSync(resolve(__dirname, '../test-image-spectrum-5x5-alpha.png')))
 
 export const server = setupServer(
   http.get(testAPIURL, async () => HttpResponse.json(testAPIResponse)
@@ -20,6 +24,13 @@ export const server = setupServer(
   http.get(testImageAPIURL, async () => new HttpResponse(testJPGResponse, {
       headers: {
         'Content-Length': testJPGResponse.byteLength.toString(),
+        'Content-Type': 'image/jpeg',
+      }
+    })
+  ),
+  http.get(testMedJPGURL, async () => new HttpResponse(testMedJPGResponse, {
+      headers: {
+        'Content-Length': testMedJPGResponse.byteLength.toString(),
         'Content-Type': 'image/jpeg',
       }
     })
@@ -39,6 +50,13 @@ export const server = setupServer(
     })
   ),
   http.get(pngAPIURL, async () => new HttpResponse(testPNGResponse, {
+      headers: {
+        'Content-Length': testPNGResponse.byteLength.toString(),
+        'Content-Type': 'image/png',
+      }
+    })
+  ),
+  http.get(pngAlphaAPIURL, async () => new HttpResponse(testPNGAlphaResponse, {
       headers: {
         'Content-Length': testPNGResponse.byteLength.toString(),
         'Content-Type': 'image/png',

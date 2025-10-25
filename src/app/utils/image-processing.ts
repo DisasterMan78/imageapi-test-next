@@ -1,5 +1,8 @@
-import { RawImageData } from "jpeg-js";
+import { decode as decodeJPEG, RawImageData } from "jpeg-js";
+import { DecodedPng, decode as decodePNG } from "fast-png";
+
 import { gaussianMapData } from "./make-gaussian-matrix";
+import FetchImageOnClient from "./fetch-image";
 
 // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-5.html#tail-recursion-elimination-on-conditional-types
 type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N
@@ -15,7 +18,9 @@ export type RGBAArray = [HexValueInDecimal, HexValueInDecimal, HexValueInDecimal
 
 export const getImageDataBuffer = async (imageData: Blob) => new Uint8Array(await imageData.arrayBuffer());
 
-
+/*
+This is a unused function from when I was trying to read and write a JPEG
+*/
 export const checkImageDataIsJPEG = (imageData: Uint8Array) => {
   // JPGs have a file signature of [0xFF, 0xD8,..., 0xFF, 0xD9] - i.e. the first two
   // elements of the image data array are (in decimal) 255 and 216
@@ -39,7 +44,7 @@ This is a unused function from when I was trying to read and write a JPEG
 */
 export const locateSOSinImage = (imageData: Uint8Array) => {
   // The Start of Scan segment of a JPEG is marked with
-  // a byte pair of [FF, DA], or [255, 218] in decimal
+  // a byte pair of [FF, DA] (or [255, 218] in decimal)
   // It seems to be the same in a PNG, but I haven't found confirmation
   // Not sure about other image formats, but I'm not dealing with them yet
   // and possibly never will!
@@ -59,8 +64,26 @@ export const locateSOSinImage = (imageData: Uint8Array) => {
   return SOSIndex;
 }
 
+export const fetchAndDecodeToImageData = async (url: string): Promise<RawImageData<Buffer> | DecodedPng | Error> => {
+  const imageData = await FetchImageOnClient(url)
+    .catch(error => {
+      return(error as Error)
+    }) as Blob;
 
-export const convertToGrayscale = (rgba: RGBAArray) => {
+  console.log(imageData.type)
+
+  const imageDataBuffer = await getImageDataBuffer(
+    imageData as Blob
+  ) as Uint8Array<ArrayBuffer>;
+
+  if (imageData.type === 'image/png') {
+    return decodePNG(imageDataBuffer)
+  } else {
+    return decodeJPEG(imageDataBuffer) as RawImageData<Buffer>;
+  }
+}
+
+export const convertPixelToGrayscale = (rgba: RGBAArray) => {
   const grayScale = Math.round((rgba[0] * 0.299) + (rgba[1] * 0.587) + (rgba[2] * 0.114));
 
   return [grayScale, grayScale, grayScale, rgba[3]];
@@ -101,12 +124,30 @@ export const convertImageDataToGrayscale = (rawImageData: RawImageData<Buffer>) 
       pixelData[index + 3],
     ];
 
-    const processedPixel = convertToGrayscale(RBGA as RGBAArray);
+    const processedPixel = convertPixelToGrayscale(RBGA as RGBAArray);
 
     newUint8CData[index] = processedPixel[0];
     newUint8CData[index + 1] = processedPixel[1];
     newUint8CData[index + 2] = processedPixel[2];
     newUint8CData[index + 3] = processedPixel[3];
+  }
+
+  return newUint8CData;
+}
+
+
+export const convertAlphaChannelToImage = (rawImageData: RawImageData<Buffer>) => {
+  const pixelData = rawImageData.data;
+  const buffer = new ArrayBuffer(
+    4 * rawImageData.width * rawImageData.height
+  );
+  const newUint8CData = new Uint8ClampedArray(buffer);
+
+  for (let index = 0; index < pixelData.length; index = index + 4) {
+    newUint8CData[index]     = pixelData[index + 3];
+    newUint8CData[index + 1] = pixelData[index + 3];
+    newUint8CData[index + 2] = pixelData[index + 3];
+    newUint8CData[index + 3] = 255;
   }
 
   return newUint8CData;

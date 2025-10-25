@@ -1,19 +1,13 @@
-import basicBlur, { averageNeighbourByChannel } from "@/app/utils/basic-blur";
-import { getImageDataBuffer, imageDataToDecimalArry, imageDataToPixelMatrix } from "@/app/utils/image-processing";
+import /*basicBlur,*/ { averageNeighbourByChannel } from "@/app/utils/basic-blur";
+import { fetchAndDecodeToImageData, imageDataToPixelMatrix } from "@/app/utils/image-processing";
 
 import { testTinyJPGURL } from '../mocks/msw.mock'
-import { decode, RawImageData } from "jpeg-js";
-import FetchImageOnClient from "@/app/utils/fetch-image";
+import { RawImageData } from "jpeg-js";
 
-let testImageData: Blob
-let testImageDataArray: Uint8Array<ArrayBuffer>
 let rawImageData: RawImageData<Buffer>
 
 beforeEach(async () => {
-  testImageData = await FetchImageOnClient(testTinyJPGURL) as Blob
-  testImageDataArray = await getImageDataBuffer(testImageData)
-  rawImageData = decode(testImageDataArray)
-  // console.log("🚀 ~ rawImageData:", rawImageData)
+  rawImageData = await fetchAndDecodeToImageData(testTinyJPGURL) as RawImageData<Buffer>
 })
 
 describe('basic blur tests', () => {

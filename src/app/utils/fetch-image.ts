@@ -1,9 +1,9 @@
 const FetchImageOnClient = async (imageURL: string): Promise<Blob | Error> => {
   let data;
   try {
-    const response = await fetch(imageURL, {
+    const response: Response = await fetch(imageURL, {
       headers: {
-        Accept: '	image/jpeg',
+        Accept: 'image/jpeg, image/png',
       },
     });
 

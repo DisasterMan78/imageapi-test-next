@@ -289,6 +289,5 @@ describe('Home', () => {
     const loading = await screen.findByRole('progressbar', {name: /Loading converted image/})
 
     expect(loading).toBeInTheDocument()
-
   })
 })

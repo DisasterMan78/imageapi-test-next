@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@testing-library/user-event": "^14.6.1",
+    "fast-png": "^7.0.1",
     "jest-fixed-jsdom": "^0.0.9",
     "jpeg-js": "^0.4.4",
     "msw": "^2.7.0",

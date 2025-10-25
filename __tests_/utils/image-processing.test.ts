@@ -5,8 +5,10 @@ import { decode, RawImageData } from 'jpeg-js'
 import FetchImageOnClient from '@/app/utils/fetch-image'
 import {
   checkImageDataIsJPEG,
+  convertAlphaChannelToImage,
   convertImageDataToGrayscale,
-  convertToGrayscale,
+  convertPixelToGrayscale,
+  fetchAndDecodeToImageData,
   gaussianMapImageData,
   getImageDataBuffer,
   imageDataToPixelMatrix,
@@ -15,7 +17,7 @@ import {
   locateSOSinImage,
   RGBAArray
 } from '@/app/utils/image-processing'
-import { pngAPIURL, testTinyJPGURL } from '../mocks/msw.mock'
+import { pngAlphaAPIURL, pngAPIURL, testTinyJPGURL } from '../mocks/msw.mock'
 
 let testImageData: Blob
 let testImageDataArray: Uint8Array<ArrayBuffer>
@@ -27,6 +29,17 @@ beforeEach(async () => {
   rawImageData = decode(testImageDataArray)
 })
 
+describe('Image fetch and decode tests', () => {
+  it('fetch an image and return the decoded data ', async () => {
+    const fetchedData = await fetchAndDecodeToImageData(testTinyJPGURL)
+
+    // This seems wrong - fetchAndDecodeToImageData() does exactly the
+    // same as the beforeEach(), so we aren't really testing properly,
+    // but it will fail if fetchAndDecodeToImageData() is changed so I
+    // feel it still has value
+    expect(fetchedData).toEqual(rawImageData)
+  })
+})
 
 describe('Image processing tests', () => {
   it ('can get the image data buffer as a Uint8Array', async () => {
@@ -56,7 +69,7 @@ describe('Image processing tests', () => {
 
   it('can convert an RGBA colour to grayscale', () => {
     const colourArray = [8, 132, 160, 255] as unknown as RGBAArray;
-    const grayscaleArray = convertToGrayscale(colourArray)
+    const grayscaleArray = convertPixelToGrayscale(colourArray)
 
     expect(grayscaleArray).toEqual([98, 98, 98, 255])
   })
@@ -114,4 +127,10 @@ describe('Image processing tests', () => {
         5,   5,   5, 255,  21,  21,  21, 255,  35,  35,  35, 255,  21,  21,  21, 255,   5,   5,   5, 255
     ]))
   })
+})
+
+it('can convert an image to its alpha channel as RGB', async () => {
+  const pngImageData = await fetchAndDecodeToImageData(pngAlphaAPIURL) as RawImageData<Buffer>
+
+  const alphaChannelImage = convertAlphaChannelToImage(pngImageData)
 })

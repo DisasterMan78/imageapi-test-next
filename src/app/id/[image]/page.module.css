@@ -49,3 +49,7 @@
   display: inline-flex;
   border: 1px solid red;
 }
+
+.smallText {
+  font-size: 0.8em;
+}
